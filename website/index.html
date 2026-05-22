@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker</title>
+    <meta name="description"
+        content="A static, terminal-inspired finance tracker built with ASCII art and dark mode design.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav>
+            <div class="logo">FINANCE.TRACKER</div>
+            <ul>
+                <li><a href="#features">// Features</a></li>
+                <!-- <li><a href="#demo">// Demo</a></li> -->
+                <li><a href="https://github.com/r2d2butbetter/maui-finance-tracker" target="_blank"
+                        rel="noopener noreferrer">// GitHub</a></li>
+            </ul>
+        </nav>
+
+        <section class="hero">
+            <div class="prompt" id="hero-prompt">
+                <span class="user">user@finance.Tracker$</span>
+                <span class="command" id="typewriter"></span><span class="cursor"></span>
+            </div>
+
+            <div class="hero-grid fade-in">
+                <div class="hero-copy">
+                    <h1>Finance<span class="muted">// Tracker</span></h1>
+                    <p class="muted" style="max-width: 600px; margin: 0 0 1.25rem 0; font-family: var(--font-sans);">
+                        A terminal-inspired, cross-platform finance tracker built with .NET MAUI. Fast, grep-able, and
+                        delightful for command-line lovers.
+                    </p>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <a href="bin/Release/net10.0-android/publish/com.companyname.financetracker-Signed.apk"
+                            class="btn btn-primary" download>Download APK</a>
+                        <a href="https://github.com/r2d2butbetter/maui-finance-tracker" class="btn" target="_blank"
+                            rel="noopener noreferrer">View on GitHub</a>
+                    </div>
+                </div>
+
+                <div class="hero-terminal" aria-hidden="true">
+                    <pre class="terminal-mock">
+user@finance:~$ ./finance-tracker --overview
+Balance: $42,069.00   Month net: +$12,279.50
+Recent: -$142.50 Grocery | +$4,200.00 Salary
+                    </pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features-container">
+            <div class="feature-box fade-in">
+                <h3>Ledger Summary</h3>
+                <p>Real-time calculation of your current balance and net income streams directly in the console.</p>
+                <div class="ascii-block">
+                    <div class="ascii-row">
+                        <span class="muted">current balance</span>
+                        <span class="cyan">$42,069.00</span>
+                    </div>
+                    <div class="ascii-row">
+                        <span class="muted">income to date</span>
+                        <span class="accent">$15,400.00</span>
+                    </div>
+                    <div class="ascii-row">
+                        <span class="muted">expense to date</span>
+                        <span class="red">$3,120.50</span>
+                    </div>
+                    <div class="ascii-row">
+                        <span class="muted">month net</span>
+                        <span class="cyan">+$12,279.50</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-box fade-in" style="transition-delay: 0.1s;">
+                <h3>Trend Analysis</h3>
+                <p>Visualize your spending habits over time with inline ASCII bar charts and color-coded signals.</p>
+                <div class="ascii-block">
+                    <div class="ascii-row ascii-bar">
+                        <span class="muted" style="width:40px">Mon</span>
+                        <span class="red" style="flex:1">████░░░░░░░░░░░</span>
+                        <span class="red">$120</span>
+                    </div>
+                    <div class="ascii-row ascii-bar">
+                        <span class="muted" style="width:40px">Tue</span>
+                        <span class="accent" style="flex:1">████████░░░░░░░</span>
+                        <span class="accent">$240</span>
+                    </div>
+                    <div class="ascii-row ascii-bar">
+                        <span class="muted" style="width:40px">Wed</span>
+                        <span class="red" style="flex:1">██░░░░░░░░░░░░░</span>
+                        <span class="red">$45</span>
+                    </div>
+                    <div class="ascii-row ascii-bar">
+                        <span class="muted" style="width:40px">Thu</span>
+                        <span class="cyan" style="flex:1">████████████░░░</span>
+                        <span class="cyan">-$400</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-box fade-in" style="transition-delay: 0.2s;">
+                <h3>Recent Transactions</h3>
+                <p>A fast, grep-able ledger of your most recent transactions. Filter and search with ease.</p>
+                <div class="ascii-block">
+                    <div class="ascii-row"
+                        style="border-bottom: 1px dashed var(--muted-color); padding-bottom: 0.3rem;">
+                        <span><span class="muted">[x]</span> Grocery Store</span>
+                        <span class="red">-$142.50</span>
+                    </div>
+                    <div class="ascii-row"
+                        style="margin-top: 0.3rem; border-bottom: 1px dashed var(--muted-color); padding-bottom: 0.3rem;">
+                        <span><span class="muted">[x]</span> Salary Deposit</span>
+                        <span class="cyan">+$4,200.00</span>
+                    </div>
+                    <div class="ascii-row" style="margin-top: 0.3rem;">
+                        <span><span class="muted">[ ]</span> Internet Bill</span>
+                        <span class="accent">-$89.99</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-logo">FINANCE.TRACKER</div>
+            <p>// Developed by <a href="https://github.com/r2d2butbetter" target="_blank"
+                    rel="noopener noreferrer">r2d2butbetter</a>.</p>
+            <p style="margin-top: 0.5rem; color: var(--track-color);">EOF</p>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
