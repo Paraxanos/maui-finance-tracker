@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="FinanceTracker.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:FinanceTracker"
+    xmlns:pages="clr-namespace:FinanceTracker.Pages"
+    FlyoutBehavior="Disabled"
+    Shell.NavBarIsVisible="False"
+    Title="Finance Tracker">
+
+    <TabBar>
+        <ShellContent
+            Title="⌁ Overview"
+            Icon="overview.svg"
+            ContentTemplate="{DataTemplate local:MainPage}"
+            Route="overview" />
+        <ShellContent
+            Title="⌁ Add"
+            Icon="add.svg"
+            ContentTemplate="{DataTemplate pages:AddExpensePage}"
+            Route="add-expense" />
+        <ShellContent
+            Title="⌁ Budget"
+            Icon="budget.svg"
+            ContentTemplate="{DataTemplate pages:BudgetPage}"
+            Route="budget" />
+        <ShellContent
+            Title="⌁ History"
+            Icon="history.svg"
+            ContentTemplate="{DataTemplate pages:HistoryPage}"
+            Route="history" />
+    </TabBar>
+
+</Shell>

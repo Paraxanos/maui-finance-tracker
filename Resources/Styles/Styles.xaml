@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <OnPlatform x:TypeArguments="x:String" x:Key="TerminalFontFamily">
+        <On Platform="WinUI" Value="Consolas" />
+        <On Platform="Android" Value="monospace" />
+        <On Platform="iOS,MacCatalyst" Value="Menlo" />
+    </OnPlatform>
+
+    <Style TargetType="Page" ApplyToDerivedTypes="True">
+        <Setter Property="Background" Value="{StaticResource TerminalBackgroundBrush}" />
+    </Style>
+
+    <Style TargetType="Shell" ApplyToDerivedTypes="True">
+        <Setter Property="Shell.BackgroundColor" Value="{StaticResource TerminalBackground}" />
+        <Setter Property="Shell.ForegroundColor" Value="{StaticResource TerminalAccent}" />
+        <Setter Property="Shell.TitleColor" Value="{StaticResource TerminalAccent}" />
+        <Setter Property="Shell.DisabledColor" Value="{StaticResource TerminalMuted}" />
+        <Setter Property="Shell.UnselectedColor" Value="{StaticResource TerminalMuted}" />
+        <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource TerminalBackground}" />
+        <Setter Property="Shell.TabBarForegroundColor" Value="{StaticResource TerminalAccent}" />
+        <Setter Property="Shell.TabBarTitleColor" Value="{StaticResource TerminalAccent}" />
+        <Setter Property="Shell.TabBarUnselectedColor" Value="{StaticResource TerminalMuted}" />
+        <Setter Property="Shell.NavBarHasShadow" Value="False" />
+    </Style>
+
+    <Style TargetType="ContentPage">
+        <Setter Property="Padding" Value="12,10,12,8" />
+        <Setter Property="Background" Value="{StaticResource TerminalBackgroundBrush}" />
+    </Style>
+
+    <Style TargetType="Border">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="StrokeThickness" Value="0" />
+    </Style>
+
+    <Style TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource TerminalFontFamily}" />
+        <Setter Property="TextColor" Value="{StaticResource TerminalText}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="LineBreakMode" Value="WordWrap" />
+    </Style>
+
+    <Style TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource TerminalFontFamily}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinimumHeightRequest" Value="0" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource TerminalAccent}" />
+        <Setter Property="BorderWidth" Value="0" />
+    </Style>
+
+    <Style TargetType="Entry">
+        <Setter Property="FontFamily" Value="{StaticResource TerminalFontFamily}" />
+        <Setter Property="TextColor" Value="{StaticResource TerminalText}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource TerminalMuted}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="MinimumHeightRequest" Value="0" />
+    </Style>
+
+    <Style TargetType="Editor">
+        <Setter Property="FontFamily" Value="{StaticResource TerminalFontFamily}" />
+        <Setter Property="TextColor" Value="{StaticResource TerminalText}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource TerminalMuted}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="AutoSize" Value="TextChanges" />
+        <Setter Property="MinimumHeightRequest" Value="0" />
+    </Style>
+
+    <Style TargetType="DatePicker">
+        <Setter Property="FontFamily" Value="{StaticResource TerminalFontFamily}" />
+        <Setter Property="TextColor" Value="{StaticResource TerminalText}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="MinimumHeightRequest" Value="0" />
+    </Style>
+
+    <Style TargetType="Picker">
+        <Setter Property="FontFamily" Value="{StaticResource TerminalFontFamily}" />
+        <Setter Property="TextColor" Value="{StaticResource TerminalText}" />
+        <Setter Property="TitleColor" Value="{StaticResource TerminalMuted}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="MinimumHeightRequest" Value="0" />
+    </Style>
+
+    <Style TargetType="CollectionView">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+    </Style>
+
+    <Style x:Key="PromptLabelStyle" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource TerminalAccent}" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style x:Key="MutedLabelStyle" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource TerminalMuted}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style x:Key="SectionTitleStyle" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource TerminalAccent}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style x:Key="MetricValueStyle" TargetType="Label">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="TextColor" Value="{StaticResource TerminalText}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style x:Key="HeroTitleStyle" TargetType="Label">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="TextColor" Value="{StaticResource TerminalText}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+</ResourceDictionary>

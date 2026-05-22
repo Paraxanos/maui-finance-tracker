@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:FinanceTracker.ViewModels"
+             x:Class="FinanceTracker.MainPage"
+             x:DataType="viewModels:OverviewViewModel"
+             BackgroundColor="{StaticResource TerminalBackground}"
+             Padding="12,10,12,8"
+             Shell.NavBarIsVisible="False">
+    <ScrollView>
+        <VerticalStackLayout Spacing="8">
+            <VerticalStackLayout Spacing="2">
+                <Label Style="{StaticResource PromptLabelStyle}"
+                       Text="user@finance.Tracker$ ledger --summary" />
+                <Label Style="{StaticResource MutedLabelStyle}"
+                       Text="{Binding HeaderMeta}" />
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="Auto,*,Auto"
+                  ColumnSpacing="8">
+                <Label Grid.Column="0"
+                       Text="[ &lt; ]"
+                       TextColor="{StaticResource TerminalAccent}"
+                       FontSize="12">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnPreviousMonthTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label Grid.Column="1"
+                       Text="{Binding DisplayedMonthLabel}"
+                       HorizontalTextAlignment="Center" />
+                <Label Grid.Column="2"
+                       Text="[ &gt; ]"
+                       TextColor="{StaticResource TerminalAccent}"
+                       FontSize="12"
+                       HorizontalTextAlignment="End">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnNextMonthTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Grid>
+
+            <Label Style="{StaticResource MutedLabelStyle}"
+                   Text="// full month calendar" />
+
+            <Grid ColumnDefinitions="*,*,*,*,*,*,*"
+                  ColumnSpacing="4">
+                <Label Grid.Column="0" Text="Mon" Style="{StaticResource MutedLabelStyle}" HorizontalTextAlignment="Center" />
+                <Label Grid.Column="1" Text="Tue" Style="{StaticResource MutedLabelStyle}" HorizontalTextAlignment="Center" />
+                <Label Grid.Column="2" Text="Wed" Style="{StaticResource MutedLabelStyle}" HorizontalTextAlignment="Center" />
+                <Label Grid.Column="3" Text="Thu" Style="{StaticResource MutedLabelStyle}" HorizontalTextAlignment="Center" />
+                <Label Grid.Column="4" Text="Fri" Style="{StaticResource MutedLabelStyle}" HorizontalTextAlignment="Center" />
+                <Label Grid.Column="5" Text="Sat" Style="{StaticResource MutedLabelStyle}" HorizontalTextAlignment="Center" />
+                <Label Grid.Column="6" Text="Sun" Style="{StaticResource MutedLabelStyle}" HorizontalTextAlignment="Center" />
+            </Grid>
+
+            <CollectionView ItemsSource="{Binding CalendarDays}"
+                            SelectionMode="None">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
+                                     Span="7"
+                                     VerticalItemSpacing="4"
+                                     HorizontalItemSpacing="4" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:MonthCalendarDayItem">
+                        <Label Text="{Binding DayText}"
+                               BackgroundColor="{Binding BackgroundColor}"
+                               TextColor="{Binding TextColor}"
+                               HorizontalTextAlignment="Center"
+                               VerticalTextAlignment="Center"
+                               Padding="0,6">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCalendarDayTapped"
+                                                      CommandParameter="{Binding .}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <VerticalStackLayout Spacing="1">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0"
+                           Text="📁 Overview" />
+                    <Label Grid.Column="1"
+                           Text="{Binding TransactionCountLabel}" />
+                </Grid>
+                <Label Style="{StaticResource MutedLabelStyle}"
+                       Text="// summary of accounts" />
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="*,Auto"
+                  RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                  RowSpacing="3"
+                  Margin="0,2,0,2">
+                <Label Grid.Row="0"
+                       Grid.Column="0"
+                       Text="current balance" />
+                <Label Grid.Row="0"
+                       Grid.Column="1"
+                       Text="{Binding CurrentBalanceLabel}"
+                       HorizontalTextAlignment="End"
+                       TextColor="{StaticResource TerminalAccentSoft}" />
+
+                <Label Grid.Row="1"
+                       Grid.Column="0"
+                       Text="income to date" />
+                <Label Grid.Row="1"
+                       Grid.Column="1"
+                       Text="{Binding TotalIncomeLabel}"
+                       HorizontalTextAlignment="End"
+                       TextColor="{StaticResource TerminalAccent}" />
+
+                <Label Grid.Row="2"
+                       Grid.Column="0"
+                       Text="expense to date" />
+                <Label Grid.Row="2"
+                       Grid.Column="1"
+                       Text="{Binding TotalExpenseLabel}"
+                       HorizontalTextAlignment="End"
+                       TextColor="{StaticResource TerminalNegative}" />
+
+                <Label Grid.Row="3"
+                       Grid.Column="0"
+                       Text="spent this month" />
+                <Label Grid.Row="3"
+                       Grid.Column="1"
+                       Text="{Binding ThisMonthSpentLabel}"
+                       HorizontalTextAlignment="End" />
+
+                <Label Grid.Row="4"
+                       Grid.Column="0"
+                       Text="month net" />
+                <Label Grid.Row="4"
+                       Grid.Column="1"
+                       Text="{Binding ThisMonthNetLabel}"
+                       HorizontalTextAlignment="End"
+                       TextColor="{StaticResource TerminalAccentSoft}" />
+            </Grid>
+
+            <VerticalStackLayout Spacing="1"
+                                 Margin="0,4,0,0">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0"
+                           Text="📈 Trend" />
+                    <Label Grid.Column="1"
+                           Text="[7 days] ▼" />
+                </Grid>
+                <Label Style="{StaticResource MutedLabelStyle}"
+                       Text="// daily expense bars" />
+            </VerticalStackLayout>
+
+            <CollectionView ItemsSource="{Binding DailySpendTrend}"
+                            SelectionMode="None"
+                            Margin="0,2,0,0">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:AsciiChartItem">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              ColumnSpacing="6"
+                              Padding="0,1">
+                            <Label Grid.Column="0"
+                                   Text="{Binding Label}"
+                                   Style="{StaticResource MutedLabelStyle}" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding BarText}"
+                                   TextColor="{Binding BarColor}" />
+                            <Label Grid.Column="2"
+                                   Text="{Binding AmountLabel}"
+                                   TextColor="{Binding AmountColor}"
+                                   HorizontalTextAlignment="End" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <VerticalStackLayout Spacing="1"
+                                 Margin="0,4,0,0">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0"
+                           Text="📊 Categories" />
+                    <Label Grid.Column="1"
+                           Text="[month] ▼" />
+                </Grid>
+                <Label Style="{StaticResource MutedLabelStyle}"
+                       Text="// monthly category breakdown" />
+            </VerticalStackLayout>
+
+            <CollectionView ItemsSource="{Binding CategoryTrend}"
+                            SelectionMode="None"
+                            Margin="0,2,0,0">
+                <CollectionView.EmptyView>
+                    <Label Style="{StaticResource MutedLabelStyle}"
+                           Text="// no category activity in this month" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:AsciiChartItem">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              ColumnSpacing="6"
+                              Padding="0,1">
+                            <Label Grid.Column="0"
+                                   Text="{Binding Label}"
+                                   Style="{StaticResource MutedLabelStyle}" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding BarText}"
+                                   TextColor="{Binding BarColor}" />
+                            <Label Grid.Column="2"
+                                   Text="{Binding AmountLabel}"
+                                   TextColor="{Binding AmountColor}"
+                                   HorizontalTextAlignment="End" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <VerticalStackLayout Spacing="1"
+                                 Margin="0,4,0,0">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0"
+                           Text="📉 Cash Flow" />
+                    <Label Grid.Column="1"
+                           Text="[6 months] ▼" />
+                </Grid>
+                <Label Style="{StaticResource MutedLabelStyle}"
+                       Text="// trailing monthly net" />
+            </VerticalStackLayout>
+
+            <CollectionView ItemsSource="{Binding MonthlyNetTrend}"
+                            SelectionMode="None"
+                            Margin="0,2,0,0">
+                <CollectionView.EmptyView>
+                    <Label Style="{StaticResource MutedLabelStyle}"
+                           Text="// not enough history yet" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:AsciiChartItem">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              ColumnSpacing="6"
+                              Padding="0,1">
+                            <Label Grid.Column="0"
+                                   Text="{Binding Label}"
+                                   Style="{StaticResource MutedLabelStyle}" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding BarText}"
+                                   TextColor="{Binding BarColor}" />
+                            <Label Grid.Column="2"
+                                   Text="{Binding AmountLabel}"
+                                   TextColor="{Binding AmountColor}"
+                                   HorizontalTextAlignment="End" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <VerticalStackLayout Spacing="1"
+                                 Margin="0,4,0,0">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0"
+                           Text="☑ Status" />
+                    <Label Grid.Column="1"
+                           Text="[month] ▼" />
+                </Grid>
+                <Label Style="{StaticResource MutedLabelStyle}"
+                       Text="// cleared vs pending ledger state" />
+            </VerticalStackLayout>
+
+            <CollectionView ItemsSource="{Binding LedgerStatusTrend}"
+                            SelectionMode="None"
+                            Margin="0,2,0,0">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:AsciiChartItem">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              ColumnSpacing="6"
+                              Padding="0,1">
+                            <Label Grid.Column="0"
+                                   Text="{Binding Label}"
+                                   Style="{StaticResource MutedLabelStyle}" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding BarText}"
+                                   TextColor="{Binding BarColor}" />
+                            <Label Grid.Column="2"
+                                   Text="{Binding AmountLabel}"
+                                   TextColor="{Binding AmountColor}"
+                                   HorizontalTextAlignment="End" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <VerticalStackLayout Spacing="1"
+                                 Margin="0,4,0,0">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0"
+                           Text="🧾 Ledger" />
+                    <Label Grid.Column="1"
+                           Text="{Binding FilteredEntryCountLabel}" />
+                </Grid>
+                <Label Style="{StaticResource MutedLabelStyle}"
+                       Text="{Binding LedgerComment}" />
+            </VerticalStackLayout>
+
+            <CollectionView ItemsSource="{Binding RecentTransactions}"
+                            SelectionMode="None"
+                            Margin="0,2,0,0">
+                <CollectionView.EmptyView>
+                    <Label Style="{StaticResource MutedLabelStyle}"
+                           Text="// no transactions for this day" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:LedgerTransactionItem">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              RowDefinitions="Auto,Auto"
+                              ColumnSpacing="6"
+                              RowSpacing="1"
+                              Padding="0,2">
+                            <Label Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{Binding CheckToken}"
+                                   TextColor="{StaticResource TerminalMuted}" />
+                            <Label Grid.Row="0"
+                                   Grid.Column="1"
+                                   Text="{Binding TitleLine}" />
+                            <Label Grid.Row="0"
+                                   Grid.Column="2"
+                                   Text="{Binding AmountLabel}"
+                                   TextColor="{Binding AmountColor}"
+                                   HorizontalTextAlignment="End" />
+                            <Label Grid.Row="1"
+                                   Grid.Column="1"
+                                   Grid.ColumnSpan="2"
+                                   Style="{StaticResource MutedLabelStyle}"
+                                   Text="{Binding MetaLine}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

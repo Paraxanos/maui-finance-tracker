@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:FinanceTracker.ViewModels"
+             x:Class="FinanceTracker.Pages.AddExpensePage"
+             x:DataType="viewModels:AddExpenseViewModel"
+             BackgroundColor="#0A0E17"
+             Padding="12,10,12,8"
+             Shell.NavBarIsVisible="False">
+    <ScrollView>
+        <VerticalStackLayout Spacing="6">
+            <VerticalStackLayout Spacing="1">
+                <Label Text="user@finance.Tracker$ add --entry"
+                       TextColor="#F5A623"
+                       FontSize="13" />
+                <Label Text="// create a new local ledger record"
+                       TextColor="#6C7A89"
+                       FontSize="12" />
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="Auto,*"
+                  ColumnSpacing="6">
+                <Label Grid.Column="0"
+                       Text=">"
+                       TextColor="#F5A623"
+                       VerticalTextAlignment="Center" />
+                <Picker Grid.Column="1"
+                        ItemsSource="{Binding EntryTypes}"
+                        SelectedItem="{Binding SelectedEntryType}"
+                        BackgroundColor="Transparent"
+                        TextColor="#E6E6E6"
+                        TitleColor="#6C7A89"
+                        FontSize="14"
+                        Title="[ type ]" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*"
+                  ColumnSpacing="6">
+                <Label Grid.Column="0"
+                       Text=">"
+                       TextColor="#F5A623"
+                       VerticalTextAlignment="Center" />
+                <Picker Grid.Column="1"
+                        ItemsSource="{Binding AvailableCategories}"
+                        SelectedItem="{Binding SelectedCategory}"
+                        BackgroundColor="Transparent"
+                        TextColor="#E6E6E6"
+                        TitleColor="#6C7A89"
+                        FontSize="14"
+                        Title="[ category ]" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*"
+                  ColumnSpacing="6">
+                <Label Grid.Column="0"
+                       Text=">"
+                       TextColor="#F5A623"
+                       VerticalTextAlignment="Center" />
+                <Entry Grid.Column="1"
+                       BackgroundColor="Transparent"
+                       TextColor="#E6E6E6"
+                       PlaceholderColor="#6C7A89"
+                       Placeholder="[ title ]"
+                       Text="{Binding Title}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*"
+                  ColumnSpacing="6">
+                <Label Grid.Column="0"
+                       Text=">"
+                       TextColor="#F5A623"
+                       VerticalTextAlignment="Center" />
+                <Entry Grid.Column="1"
+                       BackgroundColor="Transparent"
+                       TextColor="#E6E6E6"
+                       PlaceholderColor="#6C7A89"
+                       Placeholder="[ amount ]"
+                       Keyboard="Numeric"
+                       Text="{Binding AmountText}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*"
+                  ColumnSpacing="6">
+                <Label Grid.Column="0"
+                       Text=">"
+                       TextColor="#F5A623"
+                       VerticalTextAlignment="Center" />
+                <DatePicker Grid.Column="1"
+                            BackgroundColor="Transparent"
+                            TextColor="#E6E6E6"
+                            Date="{Binding SelectedDate}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*"
+                  ColumnSpacing="6">
+                <Label Grid.Column="0"
+                       Text=">"
+                       TextColor="#F5A623"
+                       VerticalTextAlignment="Start" />
+                <Editor Grid.Column="1"
+                        BackgroundColor="Transparent"
+                        TextColor="#E6E6E6"
+                        PlaceholderColor="#6C7A89"
+                        Placeholder="[ note ]"
+                        AutoSize="TextChanges"
+                        Text="{Binding Note}" />
+            </Grid>
+
+            <Label Text="{Binding ClearedTokenLabel}"
+                   TextColor="#E6E6E6"
+                   FontSize="13"
+                   Margin="0,2,0,0">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleClearedCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+
+            <Label Text="[ EXECUTE: save_entry ]"
+                   BackgroundColor="#F5A623"
+                   TextColor="#0A0E17"
+                   FontSize="13"
+                   Padding="8,4"
+                   Margin="0,4,0,0">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SaveCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+
+            <Label Text="// stored inside the app on this device"
+                   TextColor="#6C7A89"
+                   FontSize="12"
+                   Margin="0,2,0,0" />
+
+            <Label Text="{Binding FormMessage}"
+                   TextColor="{Binding FormMessageColor}"
+                   FontSize="12" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

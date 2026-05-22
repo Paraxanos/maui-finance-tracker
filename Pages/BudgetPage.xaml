@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:FinanceTracker.ViewModels"
+             x:Class="FinanceTracker.Pages.BudgetPage"
+             x:DataType="viewModels:BudgetViewModel"
+             BackgroundColor="#0A0E17"
+             Padding="12,10,12,8"
+             Shell.NavBarIsVisible="False">
+    <ScrollView>
+        <VerticalStackLayout Spacing="8">
+            <VerticalStackLayout Spacing="1">
+                <Label Text="user@finance.Tracker$ allocate --status"
+                       TextColor="#F5A623"
+                       FontSize="13" />
+                <Label Text="// zero-based resource allocation"
+                       TextColor="#6C7A89"
+                       FontSize="12" />
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                  ColumnSpacing="8">
+                <Label Grid.Column="0"
+                       Text="[ &lt; ]"
+                       TextColor="#F5A623"
+                       FontSize="12">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnPreviousMonthTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label Grid.Column="1"
+                       Text="{Binding DisplayedMonthLabel}"
+                       HorizontalTextAlignment="Center" />
+                <Label Grid.Column="2"
+                       Text="[ jump ]"
+                       TextColor="#56B6C2"
+                       FontSize="12">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnJumpMonthTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label Grid.Column="3"
+                       Text="[ &gt; ]"
+                       TextColor="#F5A623"
+                       FontSize="12"
+                       HorizontalTextAlignment="End">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnNextMonthTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Grid>
+
+            <Label Text="// budgets are month-scoped and reset automatically"
+                   TextColor="#6C7A89"
+                   FontSize="12" />
+
+            <VerticalStackLayout Spacing="1"
+                                 Margin="0,4,0,0">
+                <Label Text="&gt; sys.unallocated_pool"
+                       TextColor="#56B6C2"
+                       FontSize="13" />
+                <Label Text="{Binding UnallocatedFundsLine}"
+                       TextColor="#E6E6E6"
+                       FontSize="18" />
+                <Label Text="{Binding PoolComment}"
+                       TextColor="#6C7A89"
+                       FontSize="12" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="1"
+                                 Margin="0,4,0,0">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0"
+                           Text="📁 Budget Registry"
+                           TextColor="#E6E6E6" />
+                    <Label Grid.Column="1"
+                           Text="{Binding AllocationSummary}"
+                           TextColor="#E6E6E6" />
+                </Grid>
+                <Label Text="// use set/edit to define limits for the selected month"
+                       TextColor="#6C7A89"
+                       FontSize="12" />
+                <Label Text="// live envelope limits and burn state"
+                       TextColor="#6C7A89"
+                       FontSize="12" />
+            </VerticalStackLayout>
+
+            <CollectionView ItemsSource="{Binding BudgetCategories}"
+                            SelectionMode="None"
+                            Margin="0,2,0,0">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:BudgetCategoryItem">
+                        <VerticalStackLayout Spacing="1"
+                                             Padding="0,2">
+                            <Grid ColumnDefinitions="*,Auto,Auto"
+                                  ColumnSpacing="8">
+                                <Label Grid.Column="0"
+                                       Text="{Binding StatusAndCategoryLine}"
+                                       TextColor="{Binding StatusColor}"
+                                       FontSize="14" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding ActionToken}"
+                                       TextColor="{Binding ActionColor}"
+                                       FontSize="12">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnSetBudgetTapped"
+                                                              CommandParameter="{Binding .}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                                <Label Grid.Column="2"
+                                       Text="{Binding ClearToken}"
+                                       TextColor="{Binding ClearColor}"
+                                       FontSize="12"
+                                       IsVisible="{Binding HasBudget}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnClearBudgetTapped"
+                                                              CommandParameter="{Binding .}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </Grid>
+                            <Label Text="{Binding ProgressLine}"
+                                   TextColor="{Binding StatusColor}"
+                                   FontSize="14" />
+                            <Label Text="{Binding SummaryLine}"
+                                   TextColor="#6C7A89"
+                                   FontSize="12" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

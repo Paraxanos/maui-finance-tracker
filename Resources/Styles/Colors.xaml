@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Color x:Key="TerminalBackground">#0A0E17</Color>
+    <Color x:Key="TerminalBackgroundEdge">#070B12</Color>
+    <Color x:Key="TerminalPanel">#0A0E17</Color>
+    <Color x:Key="TerminalPanelAlt">#0A0E17</Color>
+    <Color x:Key="TerminalPanelHighlight">#0A0E17</Color>
+    <Color x:Key="TerminalBorder">Transparent</Color>
+    <Color x:Key="TerminalText">#E6E6E6</Color>
+    <Color x:Key="TerminalMuted">#6C7A89</Color>
+    <Color x:Key="TerminalSubtle">#6C7A89</Color>
+    <Color x:Key="TerminalAccent">#F5A623</Color>
+    <Color x:Key="TerminalAccentSoft">#56B6C2</Color>
+    <Color x:Key="TerminalPositive">#56B6C2</Color>
+    <Color x:Key="TerminalNegative">#E06C75</Color>
+    <Color x:Key="TerminalWarning">#F5A623</Color>
+    <Color x:Key="TerminalTrack">#1B2430</Color>
+
+    <LinearGradientBrush x:Key="TerminalBackgroundBrush"
+                         StartPoint="0,0"
+                         EndPoint="1,1">
+        <GradientStop Color="{StaticResource TerminalBackgroundEdge}" Offset="0.0" />
+        <GradientStop Color="{StaticResource TerminalBackground}" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="TerminalPanelBrush"
+                         StartPoint="0,0"
+                         EndPoint="1,1">
+        <GradientStop Color="{StaticResource TerminalBackground}" Offset="0.0" />
+        <GradientStop Color="{StaticResource TerminalBackground}" Offset="1.0" />
+    </LinearGradientBrush>
+</ResourceDictionary>
