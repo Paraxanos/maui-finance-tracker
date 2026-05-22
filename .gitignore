@@ -1,0 +1,56 @@
+# .NET / Visual Studio / MAUI
+bin/
+obj/
+obj_verify/
+verify_build/
+.vs/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userprefs
+
+# IDEs
+.idea/
+.vscode/
+
+# Logs
+*.log
+*.binlog
+build.log
+
+# Test and coverage output
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Publish and packaging output
+artifacts/
+publish/
+*.apk
+*.aab
+*.apks
+*.ipa
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+*.msixupload
+
+# Signing files and local secrets
+*.keystore
+*.jks
+*.p12
+*.snk
+*.mobileprovision
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Patch leftovers
+*.orig
+*.rej
