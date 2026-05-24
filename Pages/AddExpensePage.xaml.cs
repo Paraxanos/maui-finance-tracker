@@ -9,5 +9,6 @@ public partial class AddExpensePage : ContentPage
     {
         InitializeComponent();
         BindingContext = IPlatformApplication.Current?.Services.GetRequiredService<AddExpenseViewModel>();
+        FinanceTracker.Helpers.SwipeNavigationHelper.AddSwipeGestures(this, "overview", "budget");
     }
 }
