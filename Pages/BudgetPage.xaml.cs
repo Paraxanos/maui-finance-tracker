@@ -12,6 +12,7 @@ public partial class BudgetPage : ContentPage
     {
         InitializeComponent();
         BindingContext = IPlatformApplication.Current?.Services.GetRequiredService<BudgetViewModel>();
+        FinanceTracker.Helpers.SwipeNavigationHelper.AddSwipeGestures(this, "add-expense", "history");
     }
 
     private void OnPreviousMonthTapped(object? sender, TappedEventArgs e)
