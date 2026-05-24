@@ -1,20 +1,46 @@
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.ApplicationModel;
 
 namespace FinanceTracker.Helpers;
 
 public static class SwipeNavigationHelper
 {
     private static SwipeTransition? PendingTransition;
+    
+    // Store current active page states for global platform gesture detectors (e.g. Android MainActivity)
+    private static ContentPage? CurrentActivePage;
+    private static string? CurrentPrevRoute;
+    private static string? CurrentNextRoute;
 
     public static void AddSwipeGestures(ContentPage page, string prevRoute, string nextRoute)
     {
-        if (page.Content is not View content)
+        if (page.Content is not View pageRoot)
         {
             throw new InvalidOperationException("Swipe gestures require the page to have a root view.");
         }
 
+        // Track active page and routes when pages appear/disappear
+        page.Appearing += (s, e) =>
+        {
+            CurrentActivePage = page;
+            CurrentPrevRoute = prevRoute;
+            CurrentNextRoute = nextRoute;
+        };
+
+        page.Disappearing += (s, e) =>
+        {
+            if (CurrentActivePage == page)
+            {
+                CurrentActivePage = null;
+                CurrentPrevRoute = null;
+                CurrentNextRoute = null;
+            }
+        };
+
         page.Appearing += OnPageAppearing;
 
+        // On non-Android platforms, we attach standard SwipeGestureRecognizer to the pageRoot only
+#if !ANDROID
         if (!string.IsNullOrEmpty(prevRoute))
         {
             var swipeRight = new SwipeGestureRecognizer { Direction = SwipeDirection.Right };
@@ -22,14 +48,14 @@ public static class SwipeNavigationHelper
             {
                 try
                 {
-                    await AnimateAndNavigateAsync(content, $"//{prevRoute}", SwipeDirection.Right);
+                    await AnimateAndNavigateAsync(pageRoot, $"//{prevRoute}", SwipeDirection.Right);
                 }
                 catch
                 {
                     await Shell.Current.GoToAsync($"//{prevRoute}", animate: false);
                 }
             };
-            content.GestureRecognizers.Add(swipeRight);
+            pageRoot.GestureRecognizers.Add(swipeRight);
         }
 
         if (!string.IsNullOrEmpty(nextRoute))
@@ -39,15 +65,48 @@ public static class SwipeNavigationHelper
             {
                 try
                 {
-                    await AnimateAndNavigateAsync(content, $"//{nextRoute}", SwipeDirection.Left);
+                    await AnimateAndNavigateAsync(pageRoot, $"//{nextRoute}", SwipeDirection.Left);
                 }
                 catch
                 {
                     await Shell.Current.GoToAsync($"//{nextRoute}", animate: false);
                 }
             };
-            content.GestureRecognizers.Add(swipeLeft);
+            pageRoot.GestureRecognizers.Add(swipeLeft);
         }
+#endif
+    }
+
+    /// <summary>
+    /// Invoked by Android platform gesture interceptors to trigger swipe navigation.
+    /// </summary>
+    public static bool OnAndroidSwipe(SwipeDirection direction)
+    {
+        if (CurrentActivePage == null || CurrentActivePage.Content is not View pageRoot)
+        {
+            return false;
+        }
+
+        var route = direction == SwipeDirection.Left ? CurrentNextRoute : CurrentPrevRoute;
+        if (string.IsNullOrEmpty(route))
+        {
+            return false;
+        }
+
+        // Always run UI transitions and navigation on the main thread
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                await AnimateAndNavigateAsync(pageRoot, $"//{route}", direction);
+            }
+            catch
+            {
+                await Shell.Current.GoToAsync($"//{route}", animate: false);
+            }
+        });
+
+        return true;
     }
 
     private static async Task AnimateAndNavigateAsync(VisualElement content, string route, SwipeDirection direction)
