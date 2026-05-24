@@ -20,7 +20,14 @@ public static class SwipeNavigationHelper
             var swipeRight = new SwipeGestureRecognizer { Direction = SwipeDirection.Right };
             swipeRight.Swiped += async (s, e) =>
             {
-                await AnimateAndNavigateAsync(content, $"//{prevRoute}", SwipeDirection.Right);
+                try
+                {
+                    await AnimateAndNavigateAsync(content, $"//{prevRoute}", SwipeDirection.Right);
+                }
+                catch
+                {
+                    await Shell.Current.GoToAsync($"//{prevRoute}", animate: false);
+                }
             };
             content.GestureRecognizers.Add(swipeRight);
         }
@@ -30,7 +37,14 @@ public static class SwipeNavigationHelper
             var swipeLeft = new SwipeGestureRecognizer { Direction = SwipeDirection.Left };
             swipeLeft.Swiped += async (s, e) =>
             {
-                await AnimateAndNavigateAsync(content, $"//{nextRoute}", SwipeDirection.Left);
+                try
+                {
+                    await AnimateAndNavigateAsync(content, $"//{nextRoute}", SwipeDirection.Left);
+                }
+                catch
+                {
+                    await Shell.Current.GoToAsync($"//{nextRoute}", animate: false);
+                }
             };
             content.GestureRecognizers.Add(swipeLeft);
         }
@@ -52,30 +66,41 @@ public static class SwipeNavigationHelper
 
     private static async void OnPageAppearing(object? sender, EventArgs e)
     {
-        if (sender is not ContentPage page || page.Content is not View content)
+        try
         {
-            return;
+            if (sender is not ContentPage page || page.Content is not View content)
+            {
+                return;
+            }
+
+            var transition = PendingTransition;
+            PendingTransition = null;
+
+            if (transition is null)
+            {
+                content.TranslationX = 0;
+                content.Opacity = 1;
+                return;
+            }
+
+            var distance = Math.Max(content.Width, 320);
+            var startOffset = transition.Direction == SwipeDirection.Left ? distance : -distance;
+
+            content.TranslationX = startOffset;
+            content.Opacity = 0;
+
+            await Task.WhenAll(
+                content.TranslateToAsync(0, 0, 180, Easing.CubicOut),
+                content.FadeToAsync(1, 180, Easing.CubicOut));
         }
-
-        var transition = PendingTransition;
-        PendingTransition = null;
-
-        if (transition is null)
+        catch
         {
-            await content.TranslateToAsync(0, 0, 0);
-            await content.FadeToAsync(1, 0);
-            return;
+            if (sender is ContentPage page && page.Content is View content)
+            {
+                content.TranslationX = 0;
+                content.Opacity = 1;
+            }
         }
-
-        var distance = Math.Max(content.Width, 320);
-        var startOffset = transition.Direction == SwipeDirection.Left ? distance : -distance;
-
-        await content.TranslateToAsync(startOffset, 0, 0);
-        await content.FadeToAsync(0, 0);
-
-        await Task.WhenAll(
-            content.TranslateToAsync(0, 0, 180, Easing.CubicOut),
-            content.FadeToAsync(1, 180, Easing.CubicOut));
     }
 
     private sealed record SwipeTransition(SwipeDirection Direction);
