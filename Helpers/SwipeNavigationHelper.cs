@@ -8,13 +8,36 @@ public static class SwipeNavigationHelper
 
     public static void AddSwipeGestures(ContentPage page, string prevRoute, string nextRoute)
     {
-        if (page.Content is not View content)
+        if (page.Content is not View pageRoot)
         {
             throw new InvalidOperationException("Swipe gestures require the page to have a root view.");
         }
 
         page.Appearing += OnPageAppearing;
 
+        // Recursively attach separate gesture recognizers to pageRoot and all scrollable/layout children
+        AttachGesturesRecursively(pageRoot, pageRoot, prevRoute, nextRoute);
+    }
+
+    private static void AttachGesturesRecursively(Element element, View pageRoot, string prevRoute, string nextRoute)
+    {
+        if (element is View view)
+        {
+            // Attach to the page root, scrollable controls, and major layout containers
+            if (view == pageRoot || view is ScrollView || view is CollectionView || view is Layout)
+            {
+                AttachSwipeToControl(view, pageRoot, prevRoute, nextRoute);
+            }
+        }
+
+        foreach (var child in element.LogicalChildren)
+        {
+            AttachGesturesRecursively(child, pageRoot, prevRoute, nextRoute);
+        }
+    }
+
+    private static void AttachSwipeToControl(View view, View pageRoot, string prevRoute, string nextRoute)
+    {
         if (!string.IsNullOrEmpty(prevRoute))
         {
             var swipeRight = new SwipeGestureRecognizer { Direction = SwipeDirection.Right };
@@ -22,14 +45,14 @@ public static class SwipeNavigationHelper
             {
                 try
                 {
-                    await AnimateAndNavigateAsync(content, $"//{prevRoute}", SwipeDirection.Right);
+                    await AnimateAndNavigateAsync(pageRoot, $"//{prevRoute}", SwipeDirection.Right);
                 }
                 catch
                 {
                     await Shell.Current.GoToAsync($"//{prevRoute}", animate: false);
                 }
             };
-            content.GestureRecognizers.Add(swipeRight);
+            view.GestureRecognizers.Add(swipeRight);
         }
 
         if (!string.IsNullOrEmpty(nextRoute))
@@ -39,14 +62,14 @@ public static class SwipeNavigationHelper
             {
                 try
                 {
-                    await AnimateAndNavigateAsync(content, $"//{nextRoute}", SwipeDirection.Left);
+                    await AnimateAndNavigateAsync(pageRoot, $"//{nextRoute}", SwipeDirection.Left);
                 }
                 catch
                 {
                     await Shell.Current.GoToAsync($"//{nextRoute}", animate: false);
                 }
             };
-            content.GestureRecognizers.Add(swipeLeft);
+            view.GestureRecognizers.Add(swipeLeft);
         }
     }
 
