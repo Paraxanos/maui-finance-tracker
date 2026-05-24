@@ -25,6 +25,11 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<ApplicationTitle>Finance Tracker Dev</ApplicationTitle>
+		<ApplicationId>com.companyname.financetracker.dev</ApplicationId>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0B1210" />
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#0B1210" BaseSize="128,128" />
