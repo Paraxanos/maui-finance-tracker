@@ -1,10 +1,16 @@
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.ApplicationModel;
 
 namespace FinanceTracker.Helpers;
 
 public static class SwipeNavigationHelper
 {
     private static SwipeTransition? PendingTransition;
+    
+    // Store current active page states for global platform gesture detectors (e.g. Android MainActivity)
+    private static ContentPage? CurrentActivePage;
+    private static string? CurrentPrevRoute;
+    private static string? CurrentNextRoute;
 
     public static void AddSwipeGestures(ContentPage page, string prevRoute, string nextRoute)
     {
@@ -13,31 +19,28 @@ public static class SwipeNavigationHelper
             throw new InvalidOperationException("Swipe gestures require the page to have a root view.");
         }
 
+        // Track active page and routes when pages appear/disappear
+        page.Appearing += (s, e) =>
+        {
+            CurrentActivePage = page;
+            CurrentPrevRoute = prevRoute;
+            CurrentNextRoute = nextRoute;
+        };
+
+        page.Disappearing += (s, e) =>
+        {
+            if (CurrentActivePage == page)
+            {
+                CurrentActivePage = null;
+                CurrentPrevRoute = null;
+                CurrentNextRoute = null;
+            }
+        };
+
         page.Appearing += OnPageAppearing;
 
-        // Recursively attach separate gesture recognizers to pageRoot and all scrollable/layout children
-        AttachGesturesRecursively(pageRoot, pageRoot, prevRoute, nextRoute);
-    }
-
-    private static void AttachGesturesRecursively(Element element, View pageRoot, string prevRoute, string nextRoute)
-    {
-        if (element is View view)
-        {
-            // Attach to the page root, scrollable controls, and major layout containers
-            if (view == pageRoot || view is ScrollView || view is CollectionView || view is Layout)
-            {
-                AttachSwipeToControl(view, pageRoot, prevRoute, nextRoute);
-            }
-        }
-
-        foreach (var child in element.LogicalChildren)
-        {
-            AttachGesturesRecursively(child, pageRoot, prevRoute, nextRoute);
-        }
-    }
-
-    private static void AttachSwipeToControl(View view, View pageRoot, string prevRoute, string nextRoute)
-    {
+        // On non-Android platforms, we attach standard SwipeGestureRecognizer to the pageRoot only
+#if !ANDROID
         if (!string.IsNullOrEmpty(prevRoute))
         {
             var swipeRight = new SwipeGestureRecognizer { Direction = SwipeDirection.Right };
@@ -52,7 +55,7 @@ public static class SwipeNavigationHelper
                     await Shell.Current.GoToAsync($"//{prevRoute}", animate: false);
                 }
             };
-            view.GestureRecognizers.Add(swipeRight);
+            pageRoot.GestureRecognizers.Add(swipeRight);
         }
 
         if (!string.IsNullOrEmpty(nextRoute))
@@ -69,8 +72,41 @@ public static class SwipeNavigationHelper
                     await Shell.Current.GoToAsync($"//{nextRoute}", animate: false);
                 }
             };
-            view.GestureRecognizers.Add(swipeLeft);
+            pageRoot.GestureRecognizers.Add(swipeLeft);
         }
+#endif
+    }
+
+    /// <summary>
+    /// Invoked by Android platform gesture interceptors to trigger swipe navigation.
+    /// </summary>
+    public static bool OnAndroidSwipe(SwipeDirection direction)
+    {
+        if (CurrentActivePage == null || CurrentActivePage.Content is not View pageRoot)
+        {
+            return false;
+        }
+
+        var route = direction == SwipeDirection.Left ? CurrentNextRoute : CurrentPrevRoute;
+        if (string.IsNullOrEmpty(route))
+        {
+            return false;
+        }
+
+        // Always run UI transitions and navigation on the main thread
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                await AnimateAndNavigateAsync(pageRoot, $"//{route}", direction);
+            }
+            catch
+            {
+                await Shell.Current.GoToAsync($"//{route}", animate: false);
+            }
+        });
+
+        return true;
     }
 
     private static async Task AnimateAndNavigateAsync(VisualElement content, string route, SwipeDirection direction)
