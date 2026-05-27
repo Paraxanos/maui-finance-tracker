@@ -14,11 +14,15 @@ public class HistoryViewModel : ObservableObject
     private string lifetimeNetLabel = FinanceMath.SignedCurrency(0m);
     private bool isEmptyStateVisible = true;
     private bool hasTransactions;
+    private BankAccountSelectionItem? selectedBankAccount;
 
     public HistoryViewModel(IFinanceDataService financeDataService)
     {
         this.financeDataService = financeDataService;
         this.financeDataService.TransactionsChanged += HandleTransactionsChanged;
+        this.financeDataService.ProfileChanged += HandleProfileChanged;
+        this.financeDataService.SelectedBankAccountChanged += HandleSelectedBankAccountChanged;
+        UpdateBankAccountsList();
         Refresh();
     }
 
@@ -28,6 +32,23 @@ public class HistoryViewModel : ObservableObject
     {
         get => ledgerSummary;
         set => SetProperty(ref ledgerSummary, value);
+    }
+
+    public ObservableCollection<BankAccountSelectionItem> BankAccountsList { get; } = [];
+
+    public BankAccountSelectionItem? SelectedBankAccount
+    {
+        get => selectedBankAccount;
+        set
+        {
+            if (SetProperty(ref selectedBankAccount, value))
+            {
+                if (financeDataService.SelectedBankAccountId != value?.Id)
+                {
+                    financeDataService.SelectedBankAccountId = value?.Id;
+                }
+            }
+        }
     }
 
     public string LifetimeNetLabel
@@ -63,9 +84,50 @@ public class HistoryViewModel : ObservableObject
         Refresh();
     }
 
+    private void HandleProfileChanged(object? sender, EventArgs e)
+    {
+        UpdateBankAccountsList();
+        Refresh();
+    }
+
+    private void HandleSelectedBankAccountChanged(object? sender, EventArgs e)
+    {
+        var targetId = financeDataService.SelectedBankAccountId;
+        var matched = BankAccountsList.FirstOrDefault(item => item.Id == targetId);
+        if (matched != null && selectedBankAccount != matched)
+        {
+            SetProperty(ref selectedBankAccount, matched, nameof(SelectedBankAccount));
+        }
+        Refresh();
+    }
+
+    private void UpdateBankAccountsList()
+    {
+        var currentSelectedId = financeDataService.SelectedBankAccountId;
+        BankAccountsList.Clear();
+        BankAccountsList.Add(new BankAccountSelectionItem(null, "All Accounts"));
+        foreach (var account in financeDataService.Profile.BankAccounts)
+        {
+            BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
+        }
+        
+        var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId) 
+            ?? BankAccountsList.First();
+        
+        if (selectedBankAccount != target)
+        {
+            SetProperty(ref selectedBankAccount, target, nameof(SelectedBankAccount));
+        }
+    }
+
     private void Refresh()
     {
-        var transactions = financeDataService.Transactions.ToList();
+        UpdateBankAccountsList();
+        var allTransactions = financeDataService.Transactions.ToList();
+        var selectedAccountId = financeDataService.SelectedBankAccountId;
+        var transactions = selectedAccountId.HasValue
+            ? allTransactions.Where(t => t.BankAccountId == selectedAccountId.Value).ToList()
+            : allTransactions;
 
         MonthGroups.Clear();
 

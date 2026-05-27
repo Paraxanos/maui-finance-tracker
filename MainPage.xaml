@@ -12,8 +12,21 @@
             <VerticalStackLayout Spacing="2">
                 <Label Style="{StaticResource PromptLabelStyle}"
                        Text="user@finance.Tracker$ ledger --summary" />
-                <Label Style="{StaticResource MutedLabelStyle}"
-                       Text="{Binding HeaderMeta}" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6" VerticalOptions="Center">
+                    <Label Grid.Column="0" Style="{StaticResource MutedLabelStyle}"
+                           Text="{Binding HeaderMeta}" VerticalOptions="Center" />
+                    <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                        <Label Text="account:" Style="{StaticResource MutedLabelStyle}" VerticalOptions="Center" />
+                        <Picker ItemsSource="{Binding BankAccountsList}" 
+                                SelectedItem="{Binding SelectedBankAccount}"
+                                TextColor="{StaticResource TerminalAccentSoft}"
+                                FontSize="12"
+                                HeightRequest="30"
+                                Margin="0"
+                                Padding="4,0"
+                                VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Grid>
             </VerticalStackLayout>
 
             <Grid ColumnDefinitions="Auto,*,Auto"

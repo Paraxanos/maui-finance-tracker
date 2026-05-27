@@ -51,6 +51,23 @@
             </Grid>
 
             <Grid ColumnDefinitions="Auto,*"
+                  ColumnSpacing="6"
+                  IsVisible="{Binding HasBankAccounts}">
+                <Label Grid.Column="0"
+                       Text=">"
+                       TextColor="#F5A623"
+                       VerticalTextAlignment="Center" />
+                <Picker Grid.Column="1"
+                        ItemsSource="{Binding BankAccountsList}"
+                        SelectedItem="{Binding SelectedBankAccount}"
+                        BackgroundColor="Transparent"
+                        TextColor="#E6E6E6"
+                        TitleColor="#6C7A89"
+                        FontSize="14"
+                        Title="[ bank account ]" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*"
                   ColumnSpacing="6">
                 <Label Grid.Column="0"
                        Text=">"

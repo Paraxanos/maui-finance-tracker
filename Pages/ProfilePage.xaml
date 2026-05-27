@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:FinanceTracker.ViewModels"
+             x:Class="FinanceTracker.Pages.ProfilePage"
+             x:DataType="viewModels:ProfileViewModel"
+             BackgroundColor="#0A0E17"
+             Padding="12,10,12,8"
+             Shell.NavBarIsVisible="False">
+    <ScrollView>
+        <VerticalStackLayout Spacing="8">
+            <!-- Header Section -->
+            <VerticalStackLayout Spacing="1">
+                <Label Text="user@finance.Tracker$ profile --view"
+                       TextColor="#F5A623"
+                       FontSize="13" />
+                <Label Text="// personal ledger user environment details"
+                       TextColor="#6C7A89"
+                       FontSize="12" />
+            </VerticalStackLayout>
+
+            <!-- User Info Form -->
+            <VerticalStackLayout Spacing="6" Margin="0,4,0,0">
+                <Grid ColumnDefinitions="Auto,*"
+                      ColumnSpacing="6">
+                    <Label Grid.Column="0"
+                           Text="name>"
+                           TextColor="#F5A623"
+                           VerticalTextAlignment="Center" />
+                    <Entry Grid.Column="1"
+                           BackgroundColor="Transparent"
+                           TextColor="#E6E6E6"
+                           PlaceholderColor="#6C7A89"
+                           Placeholder="[ user name ]"
+                           Text="{Binding Name}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="Auto,*"
+                      ColumnSpacing="6">
+                    <Label Grid.Column="0"
+                           Text="mail>"
+                           TextColor="#F5A623"
+                           VerticalTextAlignment="Center" />
+                    <Entry Grid.Column="1"
+                           BackgroundColor="Transparent"
+                           TextColor="#E6E6E6"
+                           PlaceholderColor="#6C7A89"
+                           Placeholder="[ user email ]"
+                           Text="{Binding Email}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
+                    <Label Grid.Column="0" 
+                           Text="{Binding SaveMessage}"
+                           TextColor="{Binding SaveMessageColor}"
+                           FontSize="12"
+                           VerticalOptions="Center" />
+                    <Label Grid.Column="1"
+                           Text="[ save profile info ]"
+                           TextColor="#56B6C2"
+                           FontSize="13"
+                           Padding="8,4"
+                           HorizontalOptions="End">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SaveProfileCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="1" Color="#1B2430" Margin="0,6" />
+
+            <!-- Bank Accounts List Section -->
+            <VerticalStackLayout Spacing="1">
+                <Label Text="user@finance.Tracker$ accounts --list"
+                       TextColor="#F5A623"
+                       FontSize="13" />
+                <Label Text="// active liquid assets in local tracking"
+                       TextColor="#6C7A89"
+                       FontSize="12" />
+            </VerticalStackLayout>
+
+            <!-- Empty State -->
+            <VerticalStackLayout Spacing="1"
+                                 IsVisible="{Binding BankAccounts.Count, Converter={StaticResource SelectedItemConverter}, ConverterParameter=0}"
+                                 Margin="0,4">
+                <!-- Wait, to avoid converter issues in raw XAML without predefined converters, let's keep it simple or use MVVM. But wait, CollectionView handles empty lists gracefully, so we don't strictly need IsVisible empty states, or we can use standard MVVM properties. CollectionView itself has an EmptyView property! That is extremely safe and elegant! -->
+            </VerticalStackLayout>
+
+            <CollectionView ItemsSource="{Binding BankAccounts}"
+                            SelectionMode="None"
+                            Margin="0,4,0,0">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Spacing="1" Padding="0,4">
+                        <Label Text="// no active bank accounts configured"
+                               TextColor="#6C7A89"
+                               FontSize="12" />
+                        <Label Text="// use the form below to allocate a new pool"
+                               TextColor="#6C7A89"
+                               FontSize="12" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:ProfileBankAccountItem">
+                        <Grid ColumnDefinitions="*,Auto"
+                              RowDefinitions="Auto,Auto"
+                              ColumnSpacing="8"
+                              RowSpacing="1"
+                              Padding="0,4">
+                            <!-- Account Title & Current Balance -->
+                            <Label Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{Binding TitleLine}"
+                                   TextColor="#E6E6E6"
+                                   FontSize="14" />
+                            <Label Grid.Row="0"
+                                   Grid.Column="1"
+                                   Text="{Binding CurrentBalanceLabel}"
+                                   TextColor="#56B6C2"
+                                   FontSize="14"
+                                   HorizontalTextAlignment="End" />
+
+                            <!-- Initial Balance & Action Items -->
+                            <Label Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="{Binding InitialBalanceLabel}"
+                                   TextColor="#6C7A89"
+                                   FontSize="12" />
+                            
+                            <HorizontalStackLayout Grid.Row="1"
+                                                   Grid.Column="1"
+                                                   Spacing="8"
+                                                   HorizontalOptions="End">
+                                <Label Text="[ edit ]"
+                                       TextColor="#56B6C2"
+                                       FontSize="12">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ProfileViewModel}}, Path=EditAccountCommand}"
+                                                              CommandParameter="{Binding .}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                                <Label Text="[ delete ]"
+                                       TextColor="#E06C75"
+                                       FontSize="12">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ProfileViewModel}}, Path=DeleteAccountCommand}"
+                                                              CommandParameter="{Binding .}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <BoxView HeightRequest="1" Color="#1B2430" Margin="0,6" />
+
+            <!-- Add/Edit Account Section -->
+            <VerticalStackLayout Spacing="1">
+                <Label Text="{Binding FormTitle, StringFormat='&gt; sys.manage_accounts // {0}'}"
+                       TextColor="#56B6C2"
+                       FontSize="13" />
+                <Label Text="// allocate starting reserve to register liquid assets"
+                       TextColor="#6C7A89"
+                       FontSize="12" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="6" Margin="0,4,0,0">
+                <Grid ColumnDefinitions="Auto,*"
+                      ColumnSpacing="6">
+                    <Label Grid.Column="0"
+                           Text="acct.name>"
+                           TextColor="#F5A623"
+                           VerticalTextAlignment="Center" />
+                    <Entry Grid.Column="1"
+                           BackgroundColor="Transparent"
+                           TextColor="#E6E6E6"
+                           PlaceholderColor="#6C7A89"
+                           Placeholder="[ e.g. Chase Bank ]"
+                           Text="{Binding AccountName}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="Auto,*"
+                      ColumnSpacing="6">
+                    <Label Grid.Column="0"
+                           Text="acct.balance.initial>"
+                           TextColor="#F5A623"
+                           VerticalTextAlignment="Center" />
+                    <Entry Grid.Column="1"
+                           BackgroundColor="Transparent"
+                           TextColor="#E6E6E6"
+                           PlaceholderColor="#6C7A89"
+                           Placeholder="[ starting amount e.g. 5000 ]"
+                           Keyboard="Numeric"
+                           Text="{Binding InitialBalanceText}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
+                    <Label Grid.Column="0"
+                           Text="{Binding AccountMessage}"
+                           TextColor="{Binding AccountMessageColor}"
+                           FontSize="12"
+                           VerticalOptions="Center" />
+                    <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                        <Label Text="[ cancel ]"
+                               TextColor="#6C7A89"
+                               FontSize="13"
+                               Padding="8,4"
+                               IsVisible="{Binding IsEditing}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CancelEditCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                        <Label Text="{Binding FormButtonText}"
+                               TextColor="#F5A623"
+                               FontSize="13"
+                               Padding="8,4">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AddOrUpdateAccountCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

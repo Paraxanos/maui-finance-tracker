@@ -20,6 +20,7 @@ public partial class AddExpenseViewModel : ObservableObject
     private bool isCleared = true;
     private string formMessage = "ready for a new log entry";
     private Color formMessageColor = Color.FromArgb("#56B6C2");
+    private BankAccountSelectionItem? selectedBankAccount;
 
     public IReadOnlyList<string> EntryTypes { get; } = ["Expense", "Income"];
 
@@ -28,7 +29,9 @@ public partial class AddExpenseViewModel : ObservableObject
     public AddExpenseViewModel(IFinanceDataService financeDataService)
     {
         this.financeDataService = financeDataService;
+        this.financeDataService.ProfileChanged += HandleProfileChanged;
         LoadCategories();
+        UpdateBankAccountsList();
     }
 
     public string SelectedEntryType
@@ -102,6 +105,16 @@ public partial class AddExpenseViewModel : ObservableObject
         set => SetProperty(ref formMessageColor, value);
     }
 
+    public ObservableCollection<BankAccountSelectionItem> BankAccountsList { get; } = [];
+
+    public BankAccountSelectionItem? SelectedBankAccount
+    {
+        get => selectedBankAccount;
+        set => SetProperty(ref selectedBankAccount, value);
+    }
+
+    public bool HasBankAccounts => BankAccountsList.Count > 1;
+
     public string ClearedTokenLabel => IsCleared ? "[x] cleared" : "[ ] cleared";
 
     [RelayCommand]
@@ -138,7 +151,8 @@ public partial class AddExpenseViewModel : ObservableObject
             entryType,
             SelectedDate.Date,
             IsCleared,
-            DateTime.UtcNow);
+            DateTime.UtcNow,
+            SelectedBankAccount?.Id);
 
         await financeDataService.AddTransactionAsync(record);
 
@@ -170,5 +184,27 @@ public partial class AddExpenseViewModel : ObservableObject
     {
         FormMessage = message;
         FormMessageColor = Color.FromArgb(colorHex);
+    }
+
+    private void HandleProfileChanged(object? sender, EventArgs e)
+    {
+        UpdateBankAccountsList();
+    }
+
+    private void UpdateBankAccountsList()
+    {
+        var currentSelectedId = selectedBankAccount?.Id;
+        BankAccountsList.Clear();
+        BankAccountsList.Add(new BankAccountSelectionItem(null, "(No Account)"));
+        foreach (var account in financeDataService.Profile.BankAccounts)
+        {
+            BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
+        }
+        
+        var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId) 
+            ?? BankAccountsList.First();
+        
+        SelectedBankAccount = target;
+        OnPropertyChanged(nameof(HasBankAccounts));
     }
 }

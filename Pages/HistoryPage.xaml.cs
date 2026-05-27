@@ -14,7 +14,7 @@ public partial class HistoryPage : ContentPage
     {
         InitializeComponent();
         BindingContext = IPlatformApplication.Current?.Services.GetRequiredService<HistoryViewModel>();
-        FinanceTracker.Helpers.SwipeNavigationHelper.AddSwipeGestures(this, "budget", "overview");
+        FinanceTracker.Helpers.SwipeNavigationHelper.AddSwipeGestures(this, "budget", "profile");
     }
 
     private async void OnEditTapped(object? sender, TappedEventArgs e)

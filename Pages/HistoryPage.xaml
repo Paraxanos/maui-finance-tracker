@@ -14,9 +14,22 @@
             <Label Text="user@finance.Tracker$ ledger --history"
                    TextColor="#F5A623"
                    FontSize="13" />
-            <Label Text="{Binding LedgerSummary}"
-                   TextColor="#6C7A89"
-                   FontSize="12" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6" VerticalOptions="Center">
+                <Label Grid.Column="0" Text="{Binding LedgerSummary}"
+                       TextColor="#6C7A89"
+                       FontSize="12" VerticalOptions="Center" />
+                <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                    <Label Text="account:" TextColor="#6C7A89" FontSize="12" VerticalOptions="Center" />
+                    <Picker ItemsSource="{Binding BankAccountsList}" 
+                            SelectedItem="{Binding SelectedBankAccount}"
+                            TextColor="#56B6C2"
+                            FontSize="12"
+                            HeightRequest="30"
+                            Margin="0"
+                            Padding="4,0"
+                            VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Grid>
             <Label Text="lifetime net"
                    TextColor="#E6E6E6"
                    Margin="0,2,0,0" />

@@ -23,17 +23,21 @@ public class OverviewViewModel : ObservableObject
     private string headerMeta = "// track every penny. zero-based budgeting.";
     private string ledgerComment = "// showing today's transactions";
     private string displayedMonthLabel = DateTime.Today.ToString("MMMM yyyy");
+    private BankAccountSelectionItem? selectedBankAccount;
 
     public OverviewViewModel(IFinanceDataService financeDataService)
     {
         this.financeDataService = financeDataService;
         this.financeDataService.TransactionsChanged += HandleTransactionsChanged;
+        this.financeDataService.ProfileChanged += HandleProfileChanged;
+        this.financeDataService.SelectedBankAccountChanged += HandleSelectedBankAccountChanged;
         CalendarDays = [];
         RecentTransactions = [];
         DailySpendTrend = [];
         CategoryTrend = [];
         MonthlyNetTrend = [];
         LedgerStatusTrend = [];
+        UpdateBankAccountsList();
         BuildMonthCalendar();
         Refresh();
     }
@@ -54,6 +58,23 @@ public class OverviewViewModel : ObservableObject
     {
         get => currentBalanceLabel;
         set => SetProperty(ref currentBalanceLabel, value);
+    }
+
+    public ObservableCollection<BankAccountSelectionItem> BankAccountsList { get; } = [];
+
+    public BankAccountSelectionItem? SelectedBankAccount
+    {
+        get => selectedBankAccount;
+        set
+        {
+            if (SetProperty(ref selectedBankAccount, value))
+            {
+                if (financeDataService.SelectedBankAccountId != value?.Id)
+                {
+                    financeDataService.SelectedBankAccountId = value?.Id;
+                }
+            }
+        }
     }
 
     public string TotalIncomeLabel
@@ -145,9 +166,50 @@ public class OverviewViewModel : ObservableObject
         Refresh();
     }
 
+    private void HandleProfileChanged(object? sender, EventArgs e)
+    {
+        UpdateBankAccountsList();
+        Refresh();
+    }
+
+    private void HandleSelectedBankAccountChanged(object? sender, EventArgs e)
+    {
+        var targetId = financeDataService.SelectedBankAccountId;
+        var matched = BankAccountsList.FirstOrDefault(item => item.Id == targetId);
+        if (matched != null && selectedBankAccount != matched)
+        {
+            SetProperty(ref selectedBankAccount, matched, nameof(SelectedBankAccount));
+        }
+        Refresh();
+    }
+
+    private void UpdateBankAccountsList()
+    {
+        var currentSelectedId = financeDataService.SelectedBankAccountId;
+        BankAccountsList.Clear();
+        BankAccountsList.Add(new BankAccountSelectionItem(null, "All Accounts"));
+        foreach (var account in financeDataService.Profile.BankAccounts)
+        {
+            BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
+        }
+        
+        var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId) 
+            ?? BankAccountsList.First();
+        
+        if (selectedBankAccount != target)
+        {
+            SetProperty(ref selectedBankAccount, target, nameof(SelectedBankAccount));
+        }
+    }
+
     private void Refresh()
     {
-        var transactions = financeDataService.Transactions.ToList();
+        var allTransactions = financeDataService.Transactions.ToList();
+        var selectedAccountId = financeDataService.SelectedBankAccountId;
+        var transactions = selectedAccountId.HasValue
+            ? allTransactions.Where(item => item.BankAccountId == selectedAccountId.Value).ToList()
+            : allTransactions;
+
         var monthStart = new DateTime(displayedMonth.Year, displayedMonth.Month, 1);
         var nextMonth = monthStart.AddMonths(1);
 
