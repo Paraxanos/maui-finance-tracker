@@ -15,6 +15,7 @@ public class HistoryViewModel : ObservableObject
     private bool isEmptyStateVisible = true;
     private bool hasTransactions;
     private BankAccountSelectionItem? selectedBankAccount;
+    private bool isSyncingBankAccounts;
 
     public HistoryViewModel(IFinanceDataService financeDataService)
     {
@@ -43,6 +44,11 @@ public class HistoryViewModel : ObservableObject
         {
             if (SetProperty(ref selectedBankAccount, value))
             {
+                if (isSyncingBankAccounts)
+                {
+                    return;
+                }
+
                 if (financeDataService.SelectedBankAccountId != value?.Id)
                 {
                     financeDataService.SelectedBankAccountId = value?.Id;
@@ -104,25 +110,33 @@ public class HistoryViewModel : ObservableObject
     private void UpdateBankAccountsList()
     {
         var currentSelectedId = financeDataService.SelectedBankAccountId;
-        BankAccountsList.Clear();
-        BankAccountsList.Add(new BankAccountSelectionItem(null, "All Accounts"));
-        foreach (var account in financeDataService.Profile.BankAccounts)
+        var bankAccounts = financeDataService.Profile.BankAccounts ?? new List<BankAccount>();
+        isSyncingBankAccounts = true;
+        try
         {
-            BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
+            BankAccountsList.Clear();
+            BankAccountsList.Add(new BankAccountSelectionItem(null, "All Accounts"));
+            foreach (var account in bankAccounts)
+            {
+                BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
+            }
+
+            var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId)
+                ?? BankAccountsList.First();
+
+            if (selectedBankAccount != target)
+            {
+                SetProperty(ref selectedBankAccount, target, nameof(SelectedBankAccount));
+            }
         }
-        
-        var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId) 
-            ?? BankAccountsList.First();
-        
-        if (selectedBankAccount != target)
+        finally
         {
-            SetProperty(ref selectedBankAccount, target, nameof(SelectedBankAccount));
+            isSyncingBankAccounts = false;
         }
     }
 
     private void Refresh()
     {
-        UpdateBankAccountsList();
         var allTransactions = financeDataService.Transactions.ToList();
         var selectedAccountId = financeDataService.SelectedBankAccountId;
         var transactions = selectedAccountId.HasValue

@@ -80,12 +80,7 @@
                        FontSize="12" />
             </VerticalStackLayout>
 
-            <!-- Empty State -->
-            <VerticalStackLayout Spacing="1"
-                                 IsVisible="{Binding BankAccounts.Count, Converter={StaticResource SelectedItemConverter}, ConverterParameter=0}"
-                                 Margin="0,4">
-                <!-- Wait, to avoid converter issues in raw XAML without predefined converters, let's keep it simple or use MVVM. But wait, CollectionView handles empty lists gracefully, so we don't strictly need IsVisible empty states, or we can use standard MVVM properties. CollectionView itself has an EmptyView property! That is extremely safe and elegant! -->
-            </VerticalStackLayout>
+            <!-- Empty State removed for CollectionView.EmptyView -->
 
             <CollectionView ItemsSource="{Binding BankAccounts}"
                             SelectionMode="None"

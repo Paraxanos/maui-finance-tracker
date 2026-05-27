@@ -59,6 +59,7 @@
                        VerticalTextAlignment="Center" />
                 <Picker Grid.Column="1"
                         ItemsSource="{Binding BankAccountsList}"
+                        ItemDisplayBinding="{Binding Name}"
                         SelectedItem="{Binding SelectedBankAccount}"
                         BackgroundColor="Transparent"
                         TextColor="#E6E6E6"

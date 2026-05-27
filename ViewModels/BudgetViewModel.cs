@@ -16,6 +16,7 @@ public class BudgetViewModel : ObservableObject
     private string poolComment = "// based on income logged in this month";
     private string allocationSummary = "[0 active limits] ▼";
     private BankAccountSelectionItem? selectedBankAccount;
+    private bool isSyncingBankAccounts;
 
     public BudgetViewModel(IFinanceDataService financeDataService)
     {
@@ -54,6 +55,11 @@ public class BudgetViewModel : ObservableObject
         {
             if (SetProperty(ref selectedBankAccount, value))
             {
+                if (isSyncingBankAccounts)
+                {
+                    return;
+                }
+
                 if (financeDataService.SelectedBankAccountId != value?.Id)
                 {
                     financeDataService.SelectedBankAccountId = value?.Id;
@@ -136,25 +142,33 @@ public class BudgetViewModel : ObservableObject
     private void UpdateBankAccountsList()
     {
         var currentSelectedId = financeDataService.SelectedBankAccountId;
-        BankAccountsList.Clear();
-        BankAccountsList.Add(new BankAccountSelectionItem(null, "All Accounts"));
-        foreach (var account in financeDataService.Profile.BankAccounts)
+        var bankAccounts = financeDataService.Profile.BankAccounts ?? new List<BankAccount>();
+        isSyncingBankAccounts = true;
+        try
         {
-            BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
+            BankAccountsList.Clear();
+            BankAccountsList.Add(new BankAccountSelectionItem(null, "All Accounts"));
+            foreach (var account in bankAccounts)
+            {
+                BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
+            }
+
+            var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId)
+                ?? BankAccountsList.First();
+
+            if (selectedBankAccount != target)
+            {
+                SetProperty(ref selectedBankAccount, target, nameof(SelectedBankAccount));
+            }
         }
-        
-        var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId) 
-            ?? BankAccountsList.First();
-        
-        if (selectedBankAccount != target)
+        finally
         {
-            SetProperty(ref selectedBankAccount, target, nameof(SelectedBankAccount));
+            isSyncingBankAccounts = false;
         }
     }
 
     private void Refresh()
     {
-        UpdateBankAccountsList();
         var nextMonth = selectedMonth.AddMonths(1);
         var selectedAccountId = financeDataService.SelectedBankAccountId;
         var transactions = financeDataService.Transactions

@@ -21,12 +21,12 @@
                 <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
                     <Label Text="account:" TextColor="#6C7A89" FontSize="12" VerticalOptions="Center" />
                     <Picker ItemsSource="{Binding BankAccountsList}" 
+                            ItemDisplayBinding="{Binding Name}"
                             SelectedItem="{Binding SelectedBankAccount}"
                             TextColor="#56B6C2"
                             FontSize="12"
                             HeightRequest="30"
                             Margin="0"
-                            Padding="4,0"
                             VerticalOptions="Center" />
                 </HorizontalStackLayout>
             </Grid>

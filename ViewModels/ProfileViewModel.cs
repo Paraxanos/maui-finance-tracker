@@ -143,7 +143,7 @@ public sealed partial class ProfileViewModel : ObservableObject
         }
 
         var currentProfile = financeDataService.Profile;
-        var accounts = currentProfile.BankAccounts.ToList();
+        var accounts = (currentProfile.BankAccounts ?? []).ToList();
 
         if (IsEditing && editingAccountId.HasValue)
         {
@@ -172,20 +172,25 @@ public sealed partial class ProfileViewModel : ObservableObject
                 AccountName.Trim(),
                 decimal.Round(initialBalance, 2, MidpointRounding.AwayFromZero),
                 DateTime.UtcNow);
-            
+
             accounts.Add(newAccount);
             SetAccountState("account created successfully", "#56B6C2");
         }
 
         var updated = currentProfile with { BankAccounts = accounts };
         await financeDataService.SaveProfileAsync(updated);
-        
+
         CancelEdit();
     }
 
     [RelayCommand]
     private void EditAccount(ProfileBankAccountItem item)
     {
+        if (item is null)
+        {
+            return;
+        }
+
         AccountName = item.Name;
         InitialBalanceText = item.InitialBalance.ToString("F2");
         IsEditing = true;
@@ -198,13 +203,18 @@ public sealed partial class ProfileViewModel : ObservableObject
     [RelayCommand]
     private async Task DeleteAccountAsync(ProfileBankAccountItem item)
     {
+        if (item is null)
+        {
+            return;
+        }
+
         var currentProfile = financeDataService.Profile;
-        var accounts = currentProfile.BankAccounts.Where(a => a.Id != item.Id).ToList();
+        var accounts = (currentProfile.BankAccounts ?? []).Where(a => a.Id != item.Id).ToList();
         var updated = currentProfile with { BankAccounts = accounts };
-        
+
         await financeDataService.SaveProfileAsync(updated);
         SetAccountState($"deleted {item.Name}", "#E06C75");
-        
+
         if (IsEditing && editingAccountId == item.Id)
         {
             CancelEdit();
@@ -239,12 +249,12 @@ public sealed partial class ProfileViewModel : ObservableObject
         Email = profile.Email;
 
         BankAccounts.Clear();
-        foreach (var account in profile.BankAccounts)
+        foreach (var account in profile.BankAccounts ?? [])
         {
             var net = financeDataService.Transactions
                 .Where(t => t.BankAccountId == account.Id)
                 .Sum(t => t.EntryType == FinanceEntryType.Income ? t.Amount : -t.Amount);
-            
+
             var currentBalance = account.InitialBalance + net;
             BankAccounts.Add(new ProfileBankAccountItem(account.Id, account.Name, account.InitialBalance, currentBalance));
         }

@@ -216,8 +216,11 @@ public sealed class FinanceDataService : IFinanceDataService
         bool transactionsModified = false;
         try
         {
+            var currentProfile = NormalizeProfile(userProfile);
+            profile = NormalizeProfile(profile);
+
             // Identify deleted bank accounts
-            var existingIds = userProfile.BankAccounts.Select(a => a.Id).ToHashSet();
+            var existingIds = currentProfile.BankAccounts.Select(a => a.Id).ToHashSet();
             var newIds = profile.BankAccounts.Select(a => a.Id).ToHashSet();
             var deletedIds = existingIds.Where(id => !newIds.Contains(id)).ToList();
 
@@ -225,7 +228,8 @@ public sealed class FinanceDataService : IFinanceDataService
             {
                 for (int i = 0; i < transactions.Count; i++)
                 {
-                    if (transactions[i].BankAccountId.HasValue && deletedIds.Contains(transactions[i].BankAccountId.Value))
+                    var accountId = transactions[i].BankAccountId;
+                    if (accountId is Guid id && deletedIds.Contains(id))
                     {
                         transactions[i] = transactions[i] with { BankAccountId = null };
                         transactionsModified = true;
@@ -400,8 +404,9 @@ public sealed class FinanceDataService : IFinanceDataService
             try
             {
                 await using var stream = File.OpenRead(path);
-                userProfile = await JsonSerializer.DeserializeAsync<UserProfile>(stream, JsonOptions, cancellationToken)
-                    ?? new UserProfile("User", "user@finance.tracker", []);
+                userProfile = NormalizeProfile(
+                    await JsonSerializer.DeserializeAsync<UserProfile>(stream, JsonOptions, cancellationToken)
+                    ?? new UserProfile("User", "user@finance.tracker", []));
             }
             catch (JsonException)
             {
@@ -449,6 +454,14 @@ public sealed class FinanceDataService : IFinanceDataService
         }
 
         MainThread.BeginInvokeOnMainThread(() => SelectedBankAccountChanged?.Invoke(this, EventArgs.Empty));
+    }
+
+    private static UserProfile NormalizeProfile(UserProfile profile)
+    {
+        return profile with
+        {
+            BankAccounts = profile.BankAccounts ?? []
+        };
     }
 
     private sealed class FinanceSnapshot

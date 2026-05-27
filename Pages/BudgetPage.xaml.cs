@@ -5,8 +5,8 @@ namespace FinanceTracker.Pages;
 
 public partial class BudgetPage : ContentPage
 {
-    private BudgetViewModel ViewModel =>
-        (BudgetViewModel)(BindingContext ?? throw new InvalidOperationException("Missing view model."));
+    private BudgetViewModel? ViewModel =>
+        BindingContext as BudgetViewModel;
 
     public BudgetPage()
     {
@@ -17,20 +17,26 @@ public partial class BudgetPage : ContentPage
 
     private void OnPreviousMonthTapped(object? sender, TappedEventArgs e)
     {
-        ViewModel.PreviousMonth();
+        ViewModel?.PreviousMonth();
     }
 
     private void OnNextMonthTapped(object? sender, TappedEventArgs e)
     {
-        ViewModel.NextMonth();
+        ViewModel?.NextMonth();
     }
 
     private async void OnJumpMonthTapped(object? sender, TappedEventArgs e)
     {
+        var viewModel = ViewModel;
+        if (viewModel is null)
+        {
+            return;
+        }
+
         var monthText = await DisplayPromptAsync(
             "Jump To Month",
             "Enter a month as yyyy-MM",
-            initialValue: ViewModel.SelectedMonth.ToString("yyyy-MM"));
+            initialValue: viewModel.SelectedMonth.ToString("yyyy-MM"));
 
         if (monthText is null)
         {
@@ -48,11 +54,17 @@ public partial class BudgetPage : ContentPage
             return;
         }
 
-        ViewModel.SelectMonth(targetMonth);
+        viewModel.SelectMonth(targetMonth);
     }
 
     private async void OnSetBudgetTapped(object? sender, TappedEventArgs e)
     {
+        var viewModel = ViewModel;
+        if (viewModel is null)
+        {
+            return;
+        }
+
         if (ResolveBudgetItem(sender, e) is not { } item)
         {
             return;
@@ -60,7 +72,7 @@ public partial class BudgetPage : ContentPage
 
         var amountText = await DisplayPromptAsync(
             "Set Budget",
-            $"Limit for {item.CategoryKey} in {ViewModel.SelectedMonth:MMMM yyyy}",
+            $"Limit for {item.CategoryKey} in {viewModel.SelectedMonth:MMMM yyyy}",
             keyboard: Keyboard.Numeric,
             initialValue: item.HasBudget ? item.Limit.ToString("0.##") : string.Empty);
 
@@ -75,11 +87,17 @@ public partial class BudgetPage : ContentPage
             return;
         }
 
-        await ViewModel.SetBudgetAsync(item.Category, amount);
+        await viewModel.SetBudgetAsync(item.Category, amount);
     }
 
     private async void OnClearBudgetTapped(object? sender, TappedEventArgs e)
     {
+        var viewModel = ViewModel;
+        if (viewModel is null)
+        {
+            return;
+        }
+
         if (ResolveBudgetItem(sender, e) is not { } item)
         {
             return;
@@ -87,7 +105,7 @@ public partial class BudgetPage : ContentPage
 
         var shouldClear = await DisplayAlertAsync(
             "Clear Budget",
-            $"Remove the limit for {item.CategoryKey} in {ViewModel.SelectedMonth:MMMM yyyy}?",
+            $"Remove the limit for {item.CategoryKey} in {viewModel.SelectedMonth:MMMM yyyy}?",
             "Clear",
             "Cancel");
 
@@ -96,7 +114,7 @@ public partial class BudgetPage : ContentPage
             return;
         }
 
-        await ViewModel.ClearBudgetAsync(item.Category);
+        await viewModel.ClearBudgetAsync(item.Category);
     }
 
     private static BudgetCategoryItem? ResolveBudgetItem(object? sender, TappedEventArgs e)

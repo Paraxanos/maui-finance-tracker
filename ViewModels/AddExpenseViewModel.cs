@@ -194,16 +194,17 @@ public partial class AddExpenseViewModel : ObservableObject
     private void UpdateBankAccountsList()
     {
         var currentSelectedId = selectedBankAccount?.Id;
+        var bankAccounts = financeDataService.Profile.BankAccounts ?? new List<BankAccount>();
         BankAccountsList.Clear();
         BankAccountsList.Add(new BankAccountSelectionItem(null, "(No Account)"));
-        foreach (var account in financeDataService.Profile.BankAccounts)
+        foreach (var account in bankAccounts)
         {
             BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
         }
-        
-        var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId) 
+
+        var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId)
             ?? BankAccountsList.First();
-        
+
         SelectedBankAccount = target;
         OnPropertyChanged(nameof(HasBankAccounts));
     }

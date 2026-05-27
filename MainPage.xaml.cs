@@ -5,8 +5,8 @@ namespace FinanceTracker;
 
 public partial class MainPage : ContentPage
 {
-    private OverviewViewModel ViewModel =>
-        (OverviewViewModel)(BindingContext ?? throw new InvalidOperationException("Missing view model."));
+    private OverviewViewModel? ViewModel =>
+        BindingContext as OverviewViewModel;
 
     public MainPage()
     {
@@ -17,12 +17,12 @@ public partial class MainPage : ContentPage
 
     private void OnPreviousMonthTapped(object? sender, TappedEventArgs e)
     {
-        ViewModel.PreviousMonth();
+        ViewModel?.PreviousMonth();
     }
 
     private void OnNextMonthTapped(object? sender, TappedEventArgs e)
     {
-        ViewModel.NextMonth();
+        ViewModel?.NextMonth();
     }
 
     private void OnCalendarDayTapped(object? sender, TappedEventArgs e)
@@ -32,6 +32,6 @@ public partial class MainPage : ContentPage
             return;
         }
 
-        ViewModel.SelectDate(item.Date);
+        ViewModel?.SelectDate(item.Date);
     }
 }

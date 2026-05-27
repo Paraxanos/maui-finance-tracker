@@ -1,12 +1,12 @@
-using Microsoft.Maui.Controls;
 using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Controls;
 
 namespace FinanceTracker.Helpers;
 
 public static class SwipeNavigationHelper
 {
     private static SwipeTransition? PendingTransition;
-    
+
     // Store current active page states for global platform gesture detectors (e.g. Android MainActivity)
     private static ContentPage? CurrentActivePage;
     private static string? CurrentPrevRoute;
@@ -16,7 +16,7 @@ public static class SwipeNavigationHelper
     {
         if (page.Content is not View pageRoot)
         {
-            throw new InvalidOperationException("Swipe gestures require the page to have a root view.");
+            return;
         }
 
         // Track active page and routes when pages appear/disappear
@@ -52,7 +52,10 @@ public static class SwipeNavigationHelper
                 }
                 catch
                 {
-                    await Shell.Current.GoToAsync($"//{prevRoute}", animate: false);
+                    if (Shell.Current is not null)
+                    {
+                        await Shell.Current.GoToAsync($"//{prevRoute}", animate: false);
+                    }
                 }
             };
             pageRoot.GestureRecognizers.Add(swipeRight);
@@ -69,7 +72,10 @@ public static class SwipeNavigationHelper
                 }
                 catch
                 {
-                    await Shell.Current.GoToAsync($"//{nextRoute}", animate: false);
+                    if (Shell.Current is not null)
+                    {
+                        await Shell.Current.GoToAsync($"//{nextRoute}", animate: false);
+                    }
                 }
             };
             pageRoot.GestureRecognizers.Add(swipeLeft);
@@ -93,16 +99,29 @@ public static class SwipeNavigationHelper
             return false;
         }
 
+        if (Shell.Current is null)
+        {
+            return false;
+        }
+
         // Always run UI transitions and navigation on the main thread
         MainThread.BeginInvokeOnMainThread(async () =>
         {
+            if (Shell.Current is null)
+            {
+                return;
+            }
+
             try
             {
                 await AnimateAndNavigateAsync(pageRoot, $"//{route}", direction);
             }
             catch
             {
-                await Shell.Current.GoToAsync($"//{route}", animate: false);
+                if (Shell.Current is not null)
+                {
+                    await Shell.Current.GoToAsync($"//{route}", animate: false);
+                }
             }
         });
 
@@ -111,6 +130,11 @@ public static class SwipeNavigationHelper
 
     private static async Task AnimateAndNavigateAsync(VisualElement content, string route, SwipeDirection direction)
     {
+        if (Shell.Current is null)
+        {
+            return;
+        }
+
         PendingTransition = new SwipeTransition(direction);
 
         var distance = Math.Max(content.Width, 320);
@@ -120,7 +144,10 @@ public static class SwipeNavigationHelper
             content.TranslateToAsync(offset, 0, 180, Easing.CubicIn),
             content.FadeToAsync(0, 180, Easing.CubicIn));
 
-        await Shell.Current.GoToAsync(route, animate: false);
+        if (Shell.Current is not null)
+        {
+            await Shell.Current.GoToAsync(route, animate: false);
+        }
     }
 
     private static async void OnPageAppearing(object? sender, EventArgs e)
