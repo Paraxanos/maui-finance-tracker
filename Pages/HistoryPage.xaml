@@ -7,116 +7,125 @@
              BackgroundColor="#0A0E17"
              Padding="12,10,12,8"
              Shell.NavBarIsVisible="False">
-    <Grid RowDefinitions="Auto,Auto,*"
-          RowSpacing="6">
-        <VerticalStackLayout Grid.Row="0"
-                             Spacing="1">
-            <Label Text="user@finance.Tracker$ ledger --history"
-                   TextColor="#F5A623"
-                   FontSize="13" />
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6" VerticalOptions="Center">
-                <Label Grid.Column="0" Text="{Binding LedgerSummary}"
-                       TextColor="#6C7A89"
-                       FontSize="12" VerticalOptions="Center" />
-                <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
-                    <Label Text="account:" TextColor="#6C7A89" FontSize="12" VerticalOptions="Center" />
-                    <Picker ItemsSource="{Binding BankAccountsList}" 
-                            ItemDisplayBinding="{Binding Name}"
-                            SelectedItem="{Binding SelectedBankAccount}"
+       <Grid RowDefinitions="Auto,Auto,*"
+             RowSpacing="6">
+              <VerticalStackLayout Grid.Row="0"
+                                   Spacing="1">
+                     <Label Text="user@finance.Tracker$ ledger --history"
+                            TextColor="#F5A623"
+                            FontSize="13"/>
+                     <Grid ColumnDefinitions="*,Auto"
+                                   ColumnSpacing="6"
+                                   VerticalOptions="Center">
+                            <Label Grid.Column="0"
+                                          Text="{Binding LedgerSummary}"
+                                   TextColor="#6C7A89"
+                                   FontSize="12"
+                                          VerticalOptions="Center"/>
+                            <HorizontalStackLayout Grid.Column="1"
+                                          Spacing="4"
+                                          VerticalOptions="Center">
+                                   <Label Text="account:"
+                                                 TextColor="#6C7A89"
+                                                 FontSize="12"
+                                                 VerticalOptions="Center"/>
+                                   <Picker ItemsSource="{Binding BankAccountsList}"
+                                           ItemDisplayBinding="{Binding Name}"
+                                           SelectedItem="{Binding SelectedBankAccount}"
+                                           TextColor="#56B6C2"
+                                           FontSize="12"
+                                           HeightRequest="30"
+                                           Margin="0"
+                                           VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                     </Grid>
+                     <Label Text="lifetime net"
+                            TextColor="#E6E6E6"
+                            Margin="0,2,0,0"/>
+                     <Label Text="{Binding LifetimeNetLabel}"
                             TextColor="#56B6C2"
-                            FontSize="12"
-                            HeightRequest="30"
-                            Margin="0"
-                            VerticalOptions="Center" />
-                </HorizontalStackLayout>
-            </Grid>
-            <Label Text="lifetime net"
-                   TextColor="#E6E6E6"
-                   Margin="0,2,0,0" />
-            <Label Text="{Binding LifetimeNetLabel}"
-                   TextColor="#56B6C2"
-                   FontSize="16" />
-        </VerticalStackLayout>
+                            FontSize="16"/>
+              </VerticalStackLayout>
 
-        <VerticalStackLayout Grid.Row="1"
-                             IsVisible="{Binding IsEmptyStateVisible}"
-                             Spacing="1">
-            <Label Text="// no ledger entries yet"
-                   TextColor="#6C7A89"
-                   FontSize="12" />
-            <Label Text="// use the add tab to create your first entry"
-                   TextColor="#6C7A89"
-                   FontSize="12" />
-        </VerticalStackLayout>
+              <VerticalStackLayout Grid.Row="1"
+                                   IsVisible="{Binding IsEmptyStateVisible}"
+                                   Spacing="1">
+                     <Label Text="// no ledger entries yet"
+                            TextColor="#6C7A89"
+                            FontSize="12"/>
+                     <Label Text="// use the add tab to create your first entry"
+                            TextColor="#6C7A89"
+                            FontSize="12"/>
+              </VerticalStackLayout>
 
-        <CollectionView Grid.Row="2"
-                        IsGrouped="True"
-                        IsVisible="{Binding HasTransactions}"
-                        ItemsSource="{Binding MonthGroups}"
-                        SelectionMode="None">
-            <CollectionView.GroupHeaderTemplate>
-                <DataTemplate x:DataType="viewModels:HistoryMonthGroup">
-                    <VerticalStackLayout Spacing="1"
-                                         Padding="0,6,0,4">
-                        <Label Text="{Binding HeaderLine}"
-                               TextColor="#E6E6E6" />
-                        <Label Text="{Binding MetaLine}"
-                               TextColor="#6C7A89"
-                               FontSize="12" />
-                    </VerticalStackLayout>
-                </DataTemplate>
-            </CollectionView.GroupHeaderTemplate>
+              <CollectionView Grid.Row="2"
+                              IsGrouped="True"
+                              IsVisible="{Binding HasTransactions}"
+                              ItemsSource="{Binding MonthGroups}"
+                              SelectionMode="None">
+                     <CollectionView.GroupHeaderTemplate>
+                            <DataTemplate x:DataType="viewModels:HistoryMonthGroup">
+                                   <VerticalStackLayout Spacing="1"
+                                                        Padding="0,6,0,4">
+                                          <Label Text="{Binding HeaderLine}"
+                                                 TextColor="#E6E6E6"/>
+                                          <Label Text="{Binding MetaLine}"
+                                                 TextColor="#6C7A89"
+                                                 FontSize="12"/>
+                                   </VerticalStackLayout>
+                            </DataTemplate>
+                     </CollectionView.GroupHeaderTemplate>
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="viewModels:HistoryTransactionItem">
-                    <Grid ColumnDefinitions="Auto,*,Auto"
-                          RowDefinitions="Auto,Auto"
-                          ColumnSpacing="6"
-                          RowSpacing="1"
-                          Padding="0,2">
-                        <Label Grid.Row="0"
-                               Grid.Column="0"
-                               Text="{Binding CheckToken}"
-                               TextColor="#6C7A89" />
-                        <Label Grid.Row="0"
-                               Grid.Column="1"
-                               Text="{Binding TitleLine}"
-                               TextColor="#E6E6E6" />
-                        <Label Grid.Row="0"
-                               Grid.Column="2"
-                               Text="{Binding AmountLabel}"
-                               TextColor="{Binding AmountColor}"
-                               HorizontalTextAlignment="End" />
+                     <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:HistoryTransactionItem">
+                                   <Grid ColumnDefinitions="Auto,*,Auto"
+                                         RowDefinitions="Auto,Auto"
+                                         ColumnSpacing="6"
+                                         RowSpacing="1"
+                                         Padding="0,2">
+                                          <Label Grid.Row="0"
+                                                 Grid.Column="0"
+                                                 Text="{Binding CheckToken}"
+                                                 TextColor="#6C7A89"/>
+                                          <Label Grid.Row="0"
+                                                 Grid.Column="1"
+                                                 Text="{Binding TitleLine}"
+                                                 TextColor="#E6E6E6"/>
+                                          <Label Grid.Row="0"
+                                                 Grid.Column="2"
+                                                 Text="{Binding AmountLabel}"
+                                                 TextColor="{Binding AmountColor}"
+                                                 HorizontalTextAlignment="End"/>
 
-                        <Label Grid.Row="1"
-                               Grid.Column="1"
-                               Text="{Binding MetaLine}"
-                               TextColor="#6C7A89"
-                               FontSize="12" />
-                        <HorizontalStackLayout Grid.Row="1"
-                                               Grid.Column="2"
-                                               Spacing="8"
-                                               HorizontalOptions="End">
-                            <Label Text="{Binding EditToken}"
-                                   TextColor="{Binding EditColor}"
-                                   FontSize="12">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnEditTapped"
-                                                          CommandParameter="{Binding .}" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                            <Label Text="{Binding DeleteToken}"
-                                   TextColor="{Binding DeleteColor}"
-                                   FontSize="12">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnDeleteTapped"
-                                                          CommandParameter="{Binding .}" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </HorizontalStackLayout>
-                    </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </Grid>
+                                          <Label Grid.Row="1"
+                                                 Grid.Column="1"
+                                                 Text="{Binding MetaLine}"
+                                                 TextColor="#6C7A89"
+                                                 FontSize="12"/>
+                                          <HorizontalStackLayout Grid.Row="1"
+                                                                 Grid.Column="2"
+                                                                 Spacing="8"
+                                                                 HorizontalOptions="End">
+                                                 <Label Text="{Binding EditToken}"
+                                                        TextColor="{Binding EditColor}"
+                                                        FontSize="12">
+                                                        <Label.GestureRecognizers>
+                                                               <TapGestureRecognizer Tapped="OnEditTapped"
+                                                                                     CommandParameter="{Binding .}"/>
+                                                        </Label.GestureRecognizers>
+                                                 </Label>
+                                                 <Label Text="{Binding DeleteToken}"
+                                                        TextColor="{Binding DeleteColor}"
+                                                        FontSize="12">
+                                                        <Label.GestureRecognizers>
+                                                               <TapGestureRecognizer Tapped="OnDeleteTapped"
+                                                                                     CommandParameter="{Binding .}"/>
+                                                        </Label.GestureRecognizers>
+                                                 </Label>
+                                          </HorizontalStackLayout>
+                                   </Grid>
+                            </DataTemplate>
+                     </CollectionView.ItemTemplate>
+              </CollectionView>
+       </Grid>
 </ContentPage>

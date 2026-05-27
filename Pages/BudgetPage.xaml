@@ -12,21 +12,30 @@
             <VerticalStackLayout Spacing="1">
                 <Label Text="user@finance.Tracker$ allocate --status"
                        TextColor="#F5A623"
-                       FontSize="13" />
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6" VerticalOptions="Center">
-                    <Label Grid.Column="0" Text="// zero-based resource allocation"
+                       FontSize="13"/>
+                <Grid ColumnDefinitions="*,Auto"
+                        ColumnSpacing="6"
+                        VerticalOptions="Center">
+                    <Label Grid.Column="0"
+                            Text="// zero-based resource allocation"
                            TextColor="#6C7A89"
-                           FontSize="12" VerticalOptions="Center" />
-                    <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
-                        <Label Text="account:" TextColor="#6C7A89" FontSize="12" VerticalOptions="Center" />
-                        <Picker ItemsSource="{Binding BankAccountsList}" 
+                           FontSize="12"
+                            VerticalOptions="Center"/>
+                    <HorizontalStackLayout Grid.Column="1"
+                            Spacing="4"
+                            VerticalOptions="Center">
+                        <Label Text="account:"
+                                TextColor="#6C7A89"
+                                FontSize="12"
+                                VerticalOptions="Center"/>
+                        <Picker ItemsSource="{Binding BankAccountsList}"
                                 ItemDisplayBinding="{Binding Name}"
                                 SelectedItem="{Binding SelectedBankAccount}"
                                 TextColor="#56B6C2"
                                 FontSize="12"
                                 HeightRequest="30"
                                 Margin="0"
-                                VerticalOptions="Center" />
+                                VerticalOptions="Center"/>
                     </HorizontalStackLayout>
                 </Grid>
             </VerticalStackLayout>
@@ -38,18 +47,18 @@
                        TextColor="#F5A623"
                        FontSize="12">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnPreviousMonthTapped" />
+                        <TapGestureRecognizer Tapped="OnPreviousMonthTapped"/>
                     </Label.GestureRecognizers>
                 </Label>
                 <Label Grid.Column="1"
                        Text="{Binding DisplayedMonthLabel}"
-                       HorizontalTextAlignment="Center" />
+                       HorizontalTextAlignment="Center"/>
                 <Label Grid.Column="2"
                        Text="[ jump ]"
                        TextColor="#56B6C2"
                        FontSize="12">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnJumpMonthTapped" />
+                        <TapGestureRecognizer Tapped="OnJumpMonthTapped"/>
                     </Label.GestureRecognizers>
                 </Label>
                 <Label Grid.Column="3"
@@ -58,26 +67,26 @@
                        FontSize="12"
                        HorizontalTextAlignment="End">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnNextMonthTapped" />
+                        <TapGestureRecognizer Tapped="OnNextMonthTapped"/>
                     </Label.GestureRecognizers>
                 </Label>
             </Grid>
 
             <Label Text="// budgets are month-scoped and reset automatically"
                    TextColor="#6C7A89"
-                   FontSize="12" />
+                   FontSize="12"/>
 
             <VerticalStackLayout Spacing="1"
                                  Margin="0,4,0,0">
                 <Label Text="&gt; sys.unallocated_pool"
                        TextColor="#56B6C2"
-                       FontSize="13" />
+                       FontSize="13"/>
                 <Label Text="{Binding UnallocatedFundsLine}"
                        TextColor="#E6E6E6"
-                       FontSize="18" />
+                       FontSize="18"/>
                 <Label Text="{Binding PoolComment}"
                        TextColor="#6C7A89"
-                       FontSize="12" />
+                       FontSize="12"/>
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="1"
@@ -85,17 +94,17 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <Label Grid.Column="0"
                            Text="📁 Budget Registry"
-                           TextColor="#E6E6E6" />
+                           TextColor="#E6E6E6"/>
                     <Label Grid.Column="1"
                            Text="{Binding AllocationSummary}"
-                           TextColor="#E6E6E6" />
+                           TextColor="#E6E6E6"/>
                 </Grid>
                 <Label Text="// use set/edit to define limits for the selected month"
                        TextColor="#6C7A89"
-                       FontSize="12" />
+                       FontSize="12"/>
                 <Label Text="// live envelope limits and burn state"
                        TextColor="#6C7A89"
-                       FontSize="12" />
+                       FontSize="12"/>
             </VerticalStackLayout>
 
             <CollectionView ItemsSource="{Binding BudgetCategories}"
@@ -110,14 +119,14 @@
                                 <Label Grid.Column="0"
                                        Text="{Binding StatusAndCategoryLine}"
                                        TextColor="{Binding StatusColor}"
-                                       FontSize="14" />
+                                       FontSize="14"/>
                                 <Label Grid.Column="1"
                                        Text="{Binding ActionToken}"
                                        TextColor="{Binding ActionColor}"
                                        FontSize="12">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnSetBudgetTapped"
-                                                              CommandParameter="{Binding .}" />
+                                                              CommandParameter="{Binding .}"/>
                                     </Label.GestureRecognizers>
                                 </Label>
                                 <Label Grid.Column="2"
@@ -127,16 +136,16 @@
                                        IsVisible="{Binding HasBudget}">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnClearBudgetTapped"
-                                                              CommandParameter="{Binding .}" />
+                                                              CommandParameter="{Binding .}"/>
                                     </Label.GestureRecognizers>
                                 </Label>
                             </Grid>
                             <Label Text="{Binding ProgressLine}"
                                    TextColor="{Binding StatusColor}"
-                                   FontSize="14" />
+                                   FontSize="14"/>
                             <Label Text="{Binding SummaryLine}"
                                    TextColor="#6C7A89"
-                                   FontSize="12" />
+                                   FontSize="12"/>
                         </VerticalStackLayout>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
