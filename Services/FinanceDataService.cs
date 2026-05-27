@@ -15,6 +15,7 @@ public sealed class FinanceDataService : IFinanceDataService
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
         WriteIndented = true,
         Converters = { new JsonStringEnumConverter() }
     };
@@ -33,10 +34,7 @@ public sealed class FinanceDataService : IFinanceDataService
     public UserProfile Profile => userProfile;
 
     public bool IsProfileComplete =>
-        !string.IsNullOrWhiteSpace(userProfile.Name) &&
-        userProfile.Name != "User" &&
-        !string.IsNullOrWhiteSpace(userProfile.Email) &&
-        userProfile.Email != "user@finance.tracker";
+        userProfile.HasCompletedSetup;
 
     public Guid? SelectedBankAccountId
     {

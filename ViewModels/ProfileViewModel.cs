@@ -120,7 +120,8 @@ public sealed partial class ProfileViewModel : ObservableObject
         var updated = currentProfile with
         {
             Name = Name.Trim(),
-            Email = Email.Trim()
+            Email = Email.Trim(),
+            HasCompletedSetup = true
         };
 
         await financeDataService.SaveProfileAsync(updated);
