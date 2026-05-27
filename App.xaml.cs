@@ -26,6 +26,32 @@ public partial class App : Application
         try
         {
             await financeDataService.InitializeAsync();
+
+            if (!financeDataService.IsProfileComplete)
+            {
+                // Small delay to ensure Shell is fully loaded on Android
+                await Task.Delay(300);
+
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    try
+                    {
+                        if (Shell.Current?.CurrentPage is Page currentPage)
+                        {
+                            await currentPage.DisplayAlert(
+                                "sys.profile_setup",
+                                "Profile data not configured. Please enter your name and email to initialize the local ledger.",
+                                "[ configure ]");
+                        }
+
+                        await Shell.Current!.GoToAsync("//profile");
+                    }
+                    catch (Exception navEx)
+                    {
+                        Debug.WriteLine($"Failed to navigate to profile: {navEx}");
+                    }
+                });
+            }
         }
         catch (Exception ex)
         {

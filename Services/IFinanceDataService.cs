@@ -10,6 +10,8 @@ public interface IFinanceDataService
 
     UserProfile Profile { get; }
 
+    bool IsProfileComplete { get; }
+
     Guid? SelectedBankAccountId { get; set; }
 
     event EventHandler? TransactionsChanged;

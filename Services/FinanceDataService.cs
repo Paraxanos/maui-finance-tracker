@@ -32,6 +32,12 @@ public sealed class FinanceDataService : IFinanceDataService
 
     public UserProfile Profile => userProfile;
 
+    public bool IsProfileComplete =>
+        !string.IsNullOrWhiteSpace(userProfile.Name) &&
+        userProfile.Name != "User" &&
+        !string.IsNullOrWhiteSpace(userProfile.Email) &&
+        userProfile.Email != "user@finance.tracker";
+
     public Guid? SelectedBankAccountId
     {
         get => selectedBankAccountId;
