@@ -11,6 +11,8 @@ public sealed class FinanceDataService : IFinanceDataService
     private const string TransactionsStorageFileName = "transactions.json";
     private const string BudgetsStorageFileName = "budgets.json";
     private const string ProfileStorageFileName = "profile.json";
+    private const string LegacyPlaceholderName = "User";
+    private const string LegacyPlaceholderEmail = "user@finance.tracker";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -23,7 +25,7 @@ public sealed class FinanceDataService : IFinanceDataService
     private readonly SemaphoreSlim gate = new(1, 1);
     private List<FinanceRecord> transactions = [];
     private List<BudgetAllocation> budgets = [];
-    private UserProfile userProfile = new("User", "user@finance.tracker", []);
+    private UserProfile userProfile = new(string.Empty, string.Empty, []);
     private Guid? selectedBankAccountId;
     private bool isInitialized;
 
@@ -34,7 +36,8 @@ public sealed class FinanceDataService : IFinanceDataService
     public UserProfile Profile => userProfile;
 
     public bool IsProfileComplete =>
-        userProfile.HasCompletedSetup;
+        userProfile.HasCompletedSetup &&
+        userProfile.BankAccounts.Count > 0;
 
     public Guid? SelectedBankAccountId
     {
@@ -410,17 +413,17 @@ public sealed class FinanceDataService : IFinanceDataService
                 await using var stream = File.OpenRead(path);
                 userProfile = NormalizeProfile(
                     await JsonSerializer.DeserializeAsync<UserProfile>(stream, JsonOptions, cancellationToken)
-                    ?? new UserProfile("User", "user@finance.tracker", []));
+                    ?? new UserProfile(string.Empty, string.Empty, []));
             }
             catch (JsonException)
             {
-                userProfile = new UserProfile("User", "user@finance.tracker", []);
+                userProfile = new UserProfile(string.Empty, string.Empty, []);
                 await SaveProfileUnsafeAsync(cancellationToken);
             }
         }
         else
         {
-            userProfile = new UserProfile("User", "user@finance.tracker", []);
+            userProfile = new UserProfile(string.Empty, string.Empty, []);
             await SaveProfileUnsafeAsync(cancellationToken);
         }
     }
@@ -462,10 +465,25 @@ public sealed class FinanceDataService : IFinanceDataService
 
     private static UserProfile NormalizeProfile(UserProfile profile)
     {
-        return profile with
+        var normalized = profile with
         {
             BankAccounts = profile.BankAccounts ?? []
         };
+
+        if (!normalized.HasCompletedSetup)
+        {
+            if (string.Equals(normalized.Name, LegacyPlaceholderName, StringComparison.OrdinalIgnoreCase))
+            {
+                normalized = normalized with { Name = string.Empty };
+            }
+
+            if (string.Equals(normalized.Email, LegacyPlaceholderEmail, StringComparison.OrdinalIgnoreCase))
+            {
+                normalized = normalized with { Email = string.Empty };
+            }
+        }
+
+        return normalized;
     }
 
     private sealed class FinanceSnapshot

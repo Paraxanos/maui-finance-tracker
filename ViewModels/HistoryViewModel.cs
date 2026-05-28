@@ -138,6 +138,7 @@ public class HistoryViewModel : ObservableObject
     private void Refresh()
     {
         var allTransactions = financeDataService.Transactions.ToList();
+        var bankAccounts = financeDataService.Profile.BankAccounts ?? new List<BankAccount>();
         var selectedAccountId = financeDataService.SelectedBankAccountId;
         var transactions = selectedAccountId.HasValue
             ? allTransactions.Where(t => t.BankAccountId == selectedAccountId.Value).ToList()
@@ -161,7 +162,8 @@ public class HistoryViewModel : ObservableObject
         LedgerSummary = transactions.Count == 0
             ? "0 entries stored"
             : $"{transactions.Count} entries stored across {MonthGroups.Count} months";
-        LifetimeNetLabel = FinanceMath.SignedCurrency(FinanceMath.Net(transactions));
+        var lifetimeBalance = FinanceMath.Balance(allTransactions, bankAccounts, selectedAccountId);
+        LifetimeNetLabel = FinanceMath.SignedCurrency(lifetimeBalance);
         IsEmptyStateVisible = transactions.Count == 0;
         HasTransactions = transactions.Count > 0;
     }

@@ -10,6 +10,8 @@ namespace FinanceTracker.ViewModels;
 
 public partial class AddExpenseViewModel : ObservableObject
 {
+    private static readonly Guid CashAccountId = Guid.Parse("1e3b0b3e-1d0a-4a9f-8b2b-7b1f50a9d001");
+    private const string CashAccountName = "Cash";
     private readonly IFinanceDataService financeDataService;
     private string selectedEntryType = "Expense";
     private string selectedCategory = "Food";
@@ -113,7 +115,7 @@ public partial class AddExpenseViewModel : ObservableObject
         set => SetProperty(ref selectedBankAccount, value);
     }
 
-    public bool HasBankAccounts => BankAccountsList.Count > 1;
+    public bool HasBankAccounts => BankAccountsList.Count > 0;
 
     public string ClearedTokenLabel => IsCleared ? "[x] cleared" : "[ ] cleared";
 
@@ -126,6 +128,16 @@ public partial class AddExpenseViewModel : ObservableObject
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task SaveAsync()
     {
+        if (SelectedBankAccount?.Id is null)
+        {
+            SetFormState(
+                BankAccountsList.Count == 0
+                    ? "add an account in profile before saving"
+                    : "account selection is required",
+                "#E06C75");
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(Title))
         {
             SetFormState("title is required", "#E06C75");
@@ -195,15 +207,31 @@ public partial class AddExpenseViewModel : ObservableObject
     {
         var currentSelectedId = selectedBankAccount?.Id;
         var bankAccounts = financeDataService.Profile.BankAccounts ?? new List<BankAccount>();
+        var hasNamedCash = bankAccounts.Any(account =>
+            string.Equals(account.Name, CashAccountName, StringComparison.OrdinalIgnoreCase));
         BankAccountsList.Clear();
-        BankAccountsList.Add(new BankAccountSelectionItem(null, "(No Account)"));
         foreach (var account in bankAccounts)
         {
             BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
         }
 
-        var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId)
-            ?? BankAccountsList.First();
+        if (!hasNamedCash)
+        {
+            BankAccountsList.Add(new BankAccountSelectionItem(CashAccountId, CashAccountName));
+        }
+
+        var target = currentSelectedId.HasValue
+            ? BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId)
+            : null;
+
+        if (target is null && BankAccountsList.Count > 0)
+        {
+            var firstAccount = bankAccounts.FirstOrDefault();
+            target = firstAccount is null
+                ? BankAccountsList.First()
+                : BankAccountsList.FirstOrDefault(item => item.Id == firstAccount.Id)
+                  ?? BankAccountsList.First();
+        }
 
         SelectedBankAccount = target;
         OnPropertyChanged(nameof(HasBankAccounts));

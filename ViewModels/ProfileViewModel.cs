@@ -210,6 +210,12 @@ public sealed partial class ProfileViewModel : ObservableObject
         }
 
         var currentProfile = financeDataService.Profile;
+        if ((currentProfile.BankAccounts?.Count ?? 0) <= 1)
+        {
+            SetAccountState("at least one bank account is required", "#E06C75");
+            return;
+        }
+
         var accounts = (currentProfile.BankAccounts ?? []).Where(a => a.Id != item.Id).ToList();
         var updated = currentProfile with { BankAccounts = accounts };
 

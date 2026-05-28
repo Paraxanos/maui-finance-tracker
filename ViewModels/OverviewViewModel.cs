@@ -220,6 +220,7 @@ public class OverviewViewModel : ObservableObject
     private void Refresh()
     {
         var allTransactions = financeDataService.Transactions.ToList();
+        var bankAccounts = financeDataService.Profile.BankAccounts ?? new List<BankAccount>();
         var selectedAccountId = financeDataService.SelectedBankAccountId;
         var transactions = selectedAccountId.HasValue
             ? allTransactions.Where(item => item.BankAccountId == selectedAccountId.Value).ToList()
@@ -241,7 +242,8 @@ public class OverviewViewModel : ObservableObject
             .OrderByDescending(item => item.CreatedAtUtc)
             .ToList();
 
-        CurrentBalanceLabel = FinanceMath.SignedCurrency(FinanceMath.Net(transactions));
+        var currentBalance = FinanceMath.Balance(allTransactions, bankAccounts, selectedAccountId);
+        CurrentBalanceLabel = FinanceMath.SignedCurrency(currentBalance);
         TotalIncomeLabel = FinanceMath.Currency(FinanceMath.TotalIncome(transactions));
         TotalExpenseLabel = FinanceMath.Currency(FinanceMath.TotalExpenses(transactions));
         ThisMonthSpentLabel = FinanceMath.Currency(FinanceMath.TotalExpenses(monthTransactions));

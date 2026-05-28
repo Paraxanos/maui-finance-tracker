@@ -52,7 +52,7 @@
 
                      <Grid ColumnDefinitions="Auto,*"
                            ColumnSpacing="6"
-                           IsVisible="{Binding HasBankAccounts}">
+                           IsEnabled="{Binding HasBankAccounts}">
                             <Label Grid.Column="0"
                                    Text=">"
                                    TextColor="#F5A623"

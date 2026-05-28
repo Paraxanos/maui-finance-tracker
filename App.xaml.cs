@@ -38,9 +38,9 @@ public partial class App : Application
                     {
                         if (Shell.Current?.CurrentPage is Page currentPage)
                         {
-                            await currentPage.DisplayAlert(
+                            await currentPage.DisplayAlertAsync(
                                 "sys.profile_setup",
-                                "Profile data not configured. Please enter your name and email to initialize the local ledger.",
+                                "Profile data not configured. Please enter your name, email, and add at least one bank account to initialize the local ledger.",
                                 "[ configure ]");
                         }
 
