@@ -10,10 +10,14 @@ public sealed class FinanceDataService : IFinanceDataService
 {
     private const string TransactionsStorageFileName = "transactions.json";
     private const string BudgetsStorageFileName = "budgets.json";
+    private const string ProfileStorageFileName = "profile.json";
+    private const string LegacyPlaceholderName = "User";
+    private const string LegacyPlaceholderEmail = "user@finance.tracker";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
         WriteIndented = true,
         Converters = { new JsonStringEnumConverter() }
     };
@@ -21,15 +25,40 @@ public sealed class FinanceDataService : IFinanceDataService
     private readonly SemaphoreSlim gate = new(1, 1);
     private List<FinanceRecord> transactions = [];
     private List<BudgetAllocation> budgets = [];
+    private UserProfile userProfile = new(string.Empty, string.Empty, []);
+    private Guid? selectedBankAccountId;
     private bool isInitialized;
 
     public IReadOnlyList<FinanceRecord> Transactions => transactions;
 
     public IReadOnlyList<BudgetAllocation> Budgets => budgets;
 
+    public UserProfile Profile => userProfile;
+
+    public bool IsProfileComplete =>
+        userProfile.HasCompletedSetup &&
+        userProfile.BankAccounts.Count > 0;
+
+    public Guid? SelectedBankAccountId
+    {
+        get => selectedBankAccountId;
+        set
+        {
+            if (selectedBankAccountId != value)
+            {
+                selectedBankAccountId = value;
+                RaiseSelectedBankAccountChanged();
+            }
+        }
+    }
+
     public event EventHandler? TransactionsChanged;
 
     public event EventHandler? BudgetsChanged;
+
+    public event EventHandler? ProfileChanged;
+
+    public event EventHandler? SelectedBankAccountChanged;
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
@@ -49,6 +78,7 @@ public sealed class FinanceDataService : IFinanceDataService
 
             await LoadTransactionsUnsafeAsync(cancellationToken);
             await LoadBudgetsUnsafeAsync(cancellationToken);
+            await LoadProfileUnsafeAsync(cancellationToken);
 
             isInitialized = true;
         }
@@ -59,6 +89,7 @@ public sealed class FinanceDataService : IFinanceDataService
 
         RaiseTransactionsChanged();
         RaiseBudgetsChanged();
+        RaiseProfileChanged();
     }
 
     public async Task AddTransactionAsync(FinanceRecord record, CancellationToken cancellationToken = default)
@@ -182,6 +213,55 @@ public sealed class FinanceDataService : IFinanceDataService
         }
 
         RaiseBudgetsChanged();
+    }
+
+    public async Task SaveProfileAsync(UserProfile profile, CancellationToken cancellationToken = default)
+    {
+        await InitializeAsync(cancellationToken);
+        await gate.WaitAsync(cancellationToken);
+
+        bool transactionsModified = false;
+        try
+        {
+            var currentProfile = NormalizeProfile(userProfile);
+            profile = NormalizeProfile(profile);
+
+            // Identify deleted bank accounts
+            var existingIds = currentProfile.BankAccounts.Select(a => a.Id).ToHashSet();
+            var newIds = profile.BankAccounts.Select(a => a.Id).ToHashSet();
+            var deletedIds = existingIds.Where(id => !newIds.Contains(id)).ToList();
+
+            if (deletedIds.Count > 0)
+            {
+                for (int i = 0; i < transactions.Count; i++)
+                {
+                    var accountId = transactions[i].BankAccountId;
+                    if (accountId is Guid id && deletedIds.Contains(id))
+                    {
+                        transactions[i] = transactions[i] with { BankAccountId = null };
+                        transactionsModified = true;
+                    }
+                }
+            }
+
+            userProfile = profile;
+            await SaveProfileUnsafeAsync(cancellationToken);
+
+            if (transactionsModified)
+            {
+                await SaveTransactionsUnsafeAsync(cancellationToken);
+            }
+        }
+        finally
+        {
+            gate.Release();
+        }
+
+        RaiseProfileChanged();
+        if (transactionsModified)
+        {
+            RaiseTransactionsChanged();
+        }
     }
 
     private async Task LoadTransactionsUnsafeAsync(CancellationToken cancellationToken)
@@ -320,6 +400,90 @@ public sealed class FinanceDataService : IFinanceDataService
         }
 
         MainThread.BeginInvokeOnMainThread(() => BudgetsChanged?.Invoke(this, EventArgs.Empty));
+    }
+
+    private async Task LoadProfileUnsafeAsync(CancellationToken cancellationToken)
+    {
+        var path = GetProfileStoragePath();
+
+        if (File.Exists(path))
+        {
+            try
+            {
+                await using var stream = File.OpenRead(path);
+                userProfile = NormalizeProfile(
+                    await JsonSerializer.DeserializeAsync<UserProfile>(stream, JsonOptions, cancellationToken)
+                    ?? new UserProfile(string.Empty, string.Empty, []));
+            }
+            catch (JsonException)
+            {
+                userProfile = new UserProfile(string.Empty, string.Empty, []);
+                await SaveProfileUnsafeAsync(cancellationToken);
+            }
+        }
+        else
+        {
+            userProfile = new UserProfile(string.Empty, string.Empty, []);
+            await SaveProfileUnsafeAsync(cancellationToken);
+        }
+    }
+
+    private async Task SaveProfileUnsafeAsync(CancellationToken cancellationToken)
+    {
+        Directory.CreateDirectory(FileSystem.AppDataDirectory);
+
+        await using var stream = File.Create(GetProfileStoragePath());
+        await JsonSerializer.SerializeAsync(stream, userProfile, JsonOptions, cancellationToken);
+    }
+
+    private string GetProfileStoragePath()
+    {
+        return Path.Combine(FileSystem.AppDataDirectory, ProfileStorageFileName);
+    }
+
+    private void RaiseProfileChanged()
+    {
+        if (MainThread.IsMainThread)
+        {
+            ProfileChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        MainThread.BeginInvokeOnMainThread(() => ProfileChanged?.Invoke(this, EventArgs.Empty));
+    }
+
+    private void RaiseSelectedBankAccountChanged()
+    {
+        if (MainThread.IsMainThread)
+        {
+            SelectedBankAccountChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        MainThread.BeginInvokeOnMainThread(() => SelectedBankAccountChanged?.Invoke(this, EventArgs.Empty));
+    }
+
+    private static UserProfile NormalizeProfile(UserProfile profile)
+    {
+        var normalized = profile with
+        {
+            BankAccounts = profile.BankAccounts ?? []
+        };
+
+        if (!normalized.HasCompletedSetup)
+        {
+            if (string.Equals(normalized.Name, LegacyPlaceholderName, StringComparison.OrdinalIgnoreCase))
+            {
+                normalized = normalized with { Name = string.Empty };
+            }
+
+            if (string.Equals(normalized.Email, LegacyPlaceholderEmail, StringComparison.OrdinalIgnoreCase))
+            {
+                normalized = normalized with { Email = string.Empty };
+            }
+        }
+
+        return normalized;
     }
 
     private sealed class FinanceSnapshot

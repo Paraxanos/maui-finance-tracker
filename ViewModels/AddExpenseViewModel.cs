@@ -10,6 +10,8 @@ namespace FinanceTracker.ViewModels;
 
 public partial class AddExpenseViewModel : ObservableObject
 {
+    private static readonly Guid CashAccountId = Guid.Parse("1e3b0b3e-1d0a-4a9f-8b2b-7b1f50a9d001");
+    private const string CashAccountName = "Cash";
     private readonly IFinanceDataService financeDataService;
     private string selectedEntryType = "Expense";
     private string selectedCategory = "Food";
@@ -20,6 +22,7 @@ public partial class AddExpenseViewModel : ObservableObject
     private bool isCleared = true;
     private string formMessage = "ready for a new log entry";
     private Color formMessageColor = Color.FromArgb("#56B6C2");
+    private BankAccountSelectionItem? selectedBankAccount;
 
     public IReadOnlyList<string> EntryTypes { get; } = ["Expense", "Income"];
 
@@ -28,7 +31,9 @@ public partial class AddExpenseViewModel : ObservableObject
     public AddExpenseViewModel(IFinanceDataService financeDataService)
     {
         this.financeDataService = financeDataService;
+        this.financeDataService.ProfileChanged += HandleProfileChanged;
         LoadCategories();
+        UpdateBankAccountsList();
     }
 
     public string SelectedEntryType
@@ -102,6 +107,16 @@ public partial class AddExpenseViewModel : ObservableObject
         set => SetProperty(ref formMessageColor, value);
     }
 
+    public ObservableCollection<BankAccountSelectionItem> BankAccountsList { get; } = [];
+
+    public BankAccountSelectionItem? SelectedBankAccount
+    {
+        get => selectedBankAccount;
+        set => SetProperty(ref selectedBankAccount, value);
+    }
+
+    public bool HasBankAccounts => BankAccountsList.Count > 0;
+
     public string ClearedTokenLabel => IsCleared ? "[x] cleared" : "[ ] cleared";
 
     [RelayCommand]
@@ -113,6 +128,16 @@ public partial class AddExpenseViewModel : ObservableObject
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task SaveAsync()
     {
+        if (SelectedBankAccount?.Id is null)
+        {
+            SetFormState(
+                BankAccountsList.Count == 0
+                    ? "add an account in profile before saving"
+                    : "account selection is required",
+                "#E06C75");
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(Title))
         {
             SetFormState("title is required", "#E06C75");
@@ -138,7 +163,8 @@ public partial class AddExpenseViewModel : ObservableObject
             entryType,
             SelectedDate.Date,
             IsCleared,
-            DateTime.UtcNow);
+            DateTime.UtcNow,
+            SelectedBankAccount?.Id);
 
         await financeDataService.AddTransactionAsync(record);
 
@@ -170,5 +196,44 @@ public partial class AddExpenseViewModel : ObservableObject
     {
         FormMessage = message;
         FormMessageColor = Color.FromArgb(colorHex);
+    }
+
+    private void HandleProfileChanged(object? sender, EventArgs e)
+    {
+        UpdateBankAccountsList();
+    }
+
+    private void UpdateBankAccountsList()
+    {
+        var currentSelectedId = selectedBankAccount?.Id;
+        var bankAccounts = financeDataService.Profile.BankAccounts ?? new List<BankAccount>();
+        var hasNamedCash = bankAccounts.Any(account =>
+            string.Equals(account.Name, CashAccountName, StringComparison.OrdinalIgnoreCase));
+        BankAccountsList.Clear();
+        foreach (var account in bankAccounts)
+        {
+            BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
+        }
+
+        if (!hasNamedCash)
+        {
+            BankAccountsList.Add(new BankAccountSelectionItem(CashAccountId, CashAccountName));
+        }
+
+        var target = currentSelectedId.HasValue
+            ? BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId)
+            : null;
+
+        if (target is null && BankAccountsList.Count > 0)
+        {
+            var firstAccount = bankAccounts.FirstOrDefault();
+            target = firstAccount is null
+                ? BankAccountsList.First()
+                : BankAccountsList.FirstOrDefault(item => item.Id == firstAccount.Id)
+                  ?? BankAccountsList.First();
+        }
+
+        SelectedBankAccount = target;
+        OnPropertyChanged(nameof(HasBankAccounts));
     }
 }

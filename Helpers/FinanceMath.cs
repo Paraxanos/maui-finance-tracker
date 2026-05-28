@@ -24,6 +24,22 @@ public static class FinanceMath
         return TotalIncome(records) - TotalExpenses(records);
     }
 
+    public static decimal Balance(
+        IEnumerable<FinanceRecord> records,
+        IEnumerable<BankAccount> accounts,
+        Guid? accountId = null)
+    {
+        var filteredRecords = accountId.HasValue
+            ? records.Where(item => item.BankAccountId == accountId.Value)
+            : records;
+
+        var initialBalance = accountId.HasValue
+            ? accounts.FirstOrDefault(account => account.Id == accountId.Value)?.InitialBalance ?? 0m
+            : accounts.Sum(account => account.InitialBalance);
+
+        return initialBalance + Net(filteredRecords);
+    }
+
     public static decimal SignedAmount(FinanceRecord record)
     {
         return record.EntryType == FinanceEntryType.Income

@@ -15,13 +15,18 @@ public class BudgetViewModel : ObservableObject
     private string unallocatedFundsLine = $"{FinanceMath.Currency(0m)} remaining to assign";
     private string poolComment = "// based on income logged in this month";
     private string allocationSummary = "[0 active limits] ▼";
+    private BankAccountSelectionItem? selectedBankAccount;
+    private bool isSyncingBankAccounts;
 
     public BudgetViewModel(IFinanceDataService financeDataService)
     {
         this.financeDataService = financeDataService;
         this.financeDataService.TransactionsChanged += HandleDataChanged;
         this.financeDataService.BudgetsChanged += HandleDataChanged;
+        this.financeDataService.ProfileChanged += HandleProfileChanged;
+        this.financeDataService.SelectedBankAccountChanged += HandleSelectedBankAccountChanged;
         BudgetCategories = [];
+        UpdateBankAccountsList();
         Refresh();
     }
 
@@ -39,6 +44,28 @@ public class BudgetViewModel : ObservableObject
     {
         get => unallocatedFundsLine;
         set => SetProperty(ref unallocatedFundsLine, value);
+    }
+
+    public ObservableCollection<BankAccountSelectionItem> BankAccountsList { get; } = [];
+
+    public BankAccountSelectionItem? SelectedBankAccount
+    {
+        get => selectedBankAccount;
+        set
+        {
+            if (SetProperty(ref selectedBankAccount, value))
+            {
+                if (isSyncingBankAccounts)
+                {
+                    return;
+                }
+
+                if (financeDataService.SelectedBankAccountId != value?.Id)
+                {
+                    financeDataService.SelectedBankAccountId = value?.Id;
+                }
+            }
+        }
     }
 
     public string PoolComment
@@ -95,11 +122,58 @@ public class BudgetViewModel : ObservableObject
         Refresh();
     }
 
+    private void HandleProfileChanged(object? sender, EventArgs e)
+    {
+        UpdateBankAccountsList();
+        Refresh();
+    }
+
+    private void HandleSelectedBankAccountChanged(object? sender, EventArgs e)
+    {
+        var targetId = financeDataService.SelectedBankAccountId;
+        var matched = BankAccountsList.FirstOrDefault(item => item.Id == targetId);
+        if (matched != null && selectedBankAccount != matched)
+        {
+            SetProperty(ref selectedBankAccount, matched, nameof(SelectedBankAccount));
+        }
+        Refresh();
+    }
+
+    private void UpdateBankAccountsList()
+    {
+        var currentSelectedId = financeDataService.SelectedBankAccountId;
+        var bankAccounts = financeDataService.Profile.BankAccounts ?? new List<BankAccount>();
+        isSyncingBankAccounts = true;
+        try
+        {
+            BankAccountsList.Clear();
+            BankAccountsList.Add(new BankAccountSelectionItem(null, "All Accounts"));
+            foreach (var account in bankAccounts)
+            {
+                BankAccountsList.Add(new BankAccountSelectionItem(account.Id, account.Name));
+            }
+
+            var target = BankAccountsList.FirstOrDefault(item => item.Id == currentSelectedId)
+                ?? BankAccountsList.First();
+
+            if (selectedBankAccount != target)
+            {
+                SetProperty(ref selectedBankAccount, target, nameof(SelectedBankAccount));
+            }
+        }
+        finally
+        {
+            isSyncingBankAccounts = false;
+        }
+    }
+
     private void Refresh()
     {
         var nextMonth = selectedMonth.AddMonths(1);
+        var selectedAccountId = financeDataService.SelectedBankAccountId;
         var transactions = financeDataService.Transactions
             .Where(item => item.EntryDate >= selectedMonth && item.EntryDate < nextMonth)
+            .Where(item => !selectedAccountId.HasValue || item.BankAccountId == selectedAccountId)
             .ToList();
         var monthBudgets = financeDataService.Budgets
             .Where(item => item.BudgetMonth == selectedMonth)

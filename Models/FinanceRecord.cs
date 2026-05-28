@@ -9,4 +9,5 @@ public sealed record FinanceRecord(
     FinanceEntryType EntryType,
     DateTime EntryDate,
     bool IsCleared,
-    DateTime CreatedAtUtc);
+    DateTime CreatedAtUtc,
+    Guid? BankAccountId = null);

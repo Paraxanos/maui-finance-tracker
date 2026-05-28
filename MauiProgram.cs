@@ -27,6 +27,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<AddExpensePage>();
         builder.Services.AddSingleton<BudgetPage>();
         builder.Services.AddSingleton<HistoryPage>();
+        builder.Services.AddSingleton<ProfileViewModel>();
+        builder.Services.AddSingleton<ProfilePage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

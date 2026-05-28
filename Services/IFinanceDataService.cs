@@ -8,9 +8,19 @@ public interface IFinanceDataService
 
     IReadOnlyList<BudgetAllocation> Budgets { get; }
 
+    UserProfile Profile { get; }
+
+    bool IsProfileComplete { get; }
+
+    Guid? SelectedBankAccountId { get; set; }
+
     event EventHandler? TransactionsChanged;
 
     event EventHandler? BudgetsChanged;
+
+    event EventHandler? ProfileChanged;
+
+    event EventHandler? SelectedBankAccountChanged;
 
     Task InitializeAsync(CancellationToken cancellationToken = default);
 
@@ -23,4 +33,6 @@ public interface IFinanceDataService
     Task SetBudgetAsync(BudgetAllocation budget, CancellationToken cancellationToken = default);
 
     Task DeleteBudgetAsync(string category, DateTime budgetMonth, CancellationToken cancellationToken = default);
+
+    Task SaveProfileAsync(UserProfile profile, CancellationToken cancellationToken = default);
 }

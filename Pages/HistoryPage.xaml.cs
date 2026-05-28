@@ -7,14 +7,14 @@ namespace FinanceTracker.Pages;
 
 public partial class HistoryPage : ContentPage
 {
-    private HistoryViewModel ViewModel =>
-        (HistoryViewModel)(BindingContext ?? throw new InvalidOperationException("Missing view model."));
+    private HistoryViewModel? ViewModel =>
+        BindingContext as HistoryViewModel;
 
     public HistoryPage()
     {
         InitializeComponent();
         BindingContext = IPlatformApplication.Current?.Services.GetRequiredService<HistoryViewModel>();
-        FinanceTracker.Helpers.SwipeNavigationHelper.AddSwipeGestures(this, "budget", "overview");
+        FinanceTracker.Helpers.SwipeNavigationHelper.AddSwipeGestures(this, "budget", "profile");
     }
 
     private async void OnEditTapped(object? sender, TappedEventArgs e)
@@ -136,7 +136,10 @@ public partial class HistoryPage : ContentPage
             IsCleared = statusChoice == "Cleared"
         };
 
-        await ViewModel.UpdateTransactionAsync(updated);
+        if (ViewModel is not null)
+        {
+            await ViewModel.UpdateTransactionAsync(updated);
+        }
     }
 
     private async void OnDeleteTapped(object? sender, TappedEventArgs e)
@@ -157,7 +160,10 @@ public partial class HistoryPage : ContentPage
             return;
         }
 
-        await ViewModel.DeleteTransactionAsync(item.Id);
+        if (ViewModel is not null)
+        {
+            await ViewModel.DeleteTransactionAsync(item.Id);
+        }
     }
 
     private static HistoryTransactionItem? ResolveHistoryTransactionItem(object? sender, TappedEventArgs e)

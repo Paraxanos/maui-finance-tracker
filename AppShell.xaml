@@ -30,6 +30,11 @@
             Icon="history.svg"
             ContentTemplate="{DataTemplate pages:HistoryPage}"
             Route="history" />
+        <ShellContent
+            Title="⌁ Profile"
+            Icon="profile.svg"
+            ContentTemplate="{DataTemplate pages:ProfilePage}"
+            Route="profile" />
     </TabBar>
 
 </Shell>
