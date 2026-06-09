@@ -233,12 +233,12 @@
                     Margin="0,6"/>
 
             <!-- Export Section -->
-            <VerticalStackLayout x:Name="ExportPanel" x:DataType="" Spacing="1" Margin="0,12,0,0">
+            <VerticalStackLayout x:Name="ExportPanel" x:DataType="viewModels:ExportViewModel" Spacing="1" Margin="0,12,0,0">
                 <Label Text="user@finance.Tracker$ export --report" TextColor="{StaticResource TerminalAccent}" FontSize="13"/>
                 <Label Text="// serialize ledger to json or pdf for backup &amp; sharing" TextColor="{StaticResource TerminalMuted}" FontSize="12"/>
             </VerticalStackLayout>
 
-            <VerticalStackLayout x:Name="ExportControls" x:DataType="" Spacing="8" Margin="0,4,0,0">
+            <VerticalStackLayout x:Name="ExportControls" x:DataType="viewModels:ExportViewModel" Spacing="8" Margin="0,4,0,0">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
                     <Label Grid.Column="0" Text="range.start &gt; " TextColor="{StaticResource TerminalAccent}" VerticalTextAlignment="Center"/>
                     <DatePicker Grid.Column="1" BackgroundColor="Transparent" TextColor="{StaticResource TerminalText}" Date="{Binding StartDate}"/>
