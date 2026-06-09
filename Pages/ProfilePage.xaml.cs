@@ -9,6 +9,11 @@ public partial class ProfilePage : ContentPage
     {
         InitializeComponent();
         BindingContext = IPlatformApplication.Current?.Services.GetRequiredService<ProfileViewModel>();
+
+        // Scoped Export ViewModel — separate BindingContext for the export section
+        ExportPanel.BindingContext = IPlatformApplication.Current?.Services.GetRequiredService<ExportViewModel>();
+        ExportControls.BindingContext = ExportPanel.BindingContext;
+
         FinanceTracker.Helpers.SwipeNavigationHelper.AddSwipeGestures(this, "history", "overview");
     }
 }
