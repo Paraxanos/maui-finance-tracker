@@ -29,6 +29,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<HistoryPage>();
         builder.Services.AddSingleton<ProfileViewModel>();
         builder.Services.AddSingleton<ProfilePage>();
+        builder.Services.AddSingleton<IExportService, ExportService>();
+        builder.Services.AddSingleton<ExportViewModel>();
 
 #if DEBUG
         builder.Logging.AddDebug();

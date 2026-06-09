@@ -227,6 +227,40 @@
                     </HorizontalStackLayout>
                 </Grid>
             </VerticalStackLayout>
+
+            <BoxView HeightRequest="1"
+                    Color="#1B2430"
+                    Margin="0,6"/>
+
+            <!-- Export Section -->
+            <VerticalStackLayout x:Name="ExportPanel" x:DataType="viewModels:ExportViewModel" Spacing="1" Margin="0,12,0,0">
+                <Label Text="user@finance.Tracker$ export --report" TextColor="{StaticResource TerminalAccent}" FontSize="13"/>
+                <Label Text="// serialize ledger to json or pdf for backup &amp; sharing" TextColor="{StaticResource TerminalMuted}" FontSize="12"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout x:Name="ExportControls" x:DataType="viewModels:ExportViewModel" Spacing="8" Margin="0,4,0,0">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                    <Label Grid.Column="0" Text="range.start &gt; " TextColor="{StaticResource TerminalAccent}" VerticalTextAlignment="Center"/>
+                    <DatePicker Grid.Column="1" BackgroundColor="Transparent" TextColor="{StaticResource TerminalText}" Date="{Binding StartDate}"/>
+                </Grid>
+
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                    <Label Grid.Column="0" Text="range.end   &gt; " TextColor="{StaticResource TerminalAccent}" VerticalTextAlignment="Center"/>
+                    <DatePicker Grid.Column="1" BackgroundColor="Transparent" TextColor="{StaticResource TerminalText}" Date="{Binding EndDate}"/>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Margin="0,2,0,0">
+                    <Label Grid.Column="0" Text="{Binding StatusMessage}" TextColor="{Binding StatusMessageColor}" FontSize="12" VerticalOptions="Center"/>
+                    <Label Grid.Column="1" Text="[ json ]" TextColor="{StaticResource TerminalAccentSoft}" FontSize="13" Padding="8,4">
+                        <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding ExportJsonCommand}"/></Label.GestureRecognizers>
+                    </Label>
+                    <Label Grid.Column="2" Text="[ pdf ]" TextColor="{StaticResource TerminalAccent}" FontSize="13" Padding="8,4">
+                        <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding ExportPdfCommand}"/></Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource TerminalAccentSoft}" HeightRequest="20" WidthRequest="20" HorizontalOptions="Start"/>
+            </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
